@@ -1,4 +1,4 @@
-#include "UnitTestTools.cuh"
+#include "validation/UnitTestTools.cuh"
 #include "seblas/operations/cuOperations.cuh"
 #include "cudnn.h"
 #include "seann/seann.cuh"

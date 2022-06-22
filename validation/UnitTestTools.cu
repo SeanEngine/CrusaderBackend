@@ -3,7 +3,7 @@
 //
 
 #include "UnitTestTools.cuh"
-#include "seblas/operations/cuOperations.cuh"
+#include "../seblas/operations/cuOperations.cuh"
 #include "cudnn.h"
 #include <fstream>
 #define BASE_PATH string("D:\\Projects\\PyCharm\\UnitTestTool\\TestContents\\")

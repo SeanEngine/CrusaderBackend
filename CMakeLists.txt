@@ -53,8 +53,35 @@ add_executable(Crusader main.cu
         seio/logging/LogUtils.cu
         seio/logging/LogUtils.cuh
 
-        UnitTestTools.cu
-        UnitTestTools.cuh seann/optimizers/Optimizers.cu seann/optimizers/Optimizers.cuh seann/containers/Sequential.cu seann/containers/Sequential.cuh seann/containers/NetParam.cu seann/containers/NetParam.cuh seann/operands/OperandBase.cu seann/operands/OperandBase.cuh seann/operands/Linear.cu seann/operands/Linear.cuh seann/operands/Conv2D.cu seann/operands/Conv2D.cuh seann/operands/BatchNorm.cu seann/operands/BatchNorm.cuh seann/operands/MaxPool2D.cu seann/operands/MaxPool2D.cuh seann/operands/ReLU.cu seann/operands/ReLU.cuh seann/operands/Softmax.cu seann/operands/Softmax.cuh seio/data/Dataset.cu seio/data/Dataset.cuh seio/data/DataLoader.cu seio/data/DataLoader.cuh seann/seann.cuh)
+        validation/UnitTestTools.cu
+        validation/UnitTestTools.cuh
+
+        seann/optimizers/Optimizers.cu
+        seann/optimizers/Optimizers.cuh
+        seann/containers/Sequential.cu
+        seann/containers/Sequential.cuh
+        seann/containers/NetParam.cu
+        seann/containers/NetParam.cuh
+        seann/operands/OperandBase.cu
+        seann/operands/OperandBase.cuh
+        seann/operands/Linear.cu
+        seann/operands/Linear.cuh
+        seann/operands/Conv2D.cu
+        seann/operands/Conv2D.cuh
+        seann/operands/BatchNorm.cu
+        seann/operands/BatchNorm.cuh
+        seann/operands/MaxPool2D.cu
+        seann/operands/MaxPool2D.cuh
+        seann/operands/ReLU.cu
+        seann/operands/ReLU.cuh
+        seann/operands/Softmax.cu
+        seann/operands/Softmax.cuh
+        seio/data/Dataset.cu
+        seio/data/Dataset.cuh
+        seio/data/DataLoader.cu
+        seio/data/DataLoader.cuh
+        seann/seann.cuh
+        )
 
 include_directories(${CUDNN_PATH}/include)
 link_directories(${CUDNN_PATH} ${CUDNN_PATH}/bin ${CUDNN_PATH}/lib/x64 ${CUDNN_PATH}/dec/dll_x64)
