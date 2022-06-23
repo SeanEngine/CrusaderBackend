@@ -15,5 +15,6 @@
 #include "cuLinear.cuh"
 #include "cuBatchNorm.cuh"
 #include "cuActivation.cuh"
+#include "cuDropout.cuh"
 
 #endif //CRUSADER_CUOPERATIONS_CUH

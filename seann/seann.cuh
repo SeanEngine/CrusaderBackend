@@ -13,6 +13,6 @@
 #include "operands/MaxPool2D.cuh"
 #include "operands/BatchNorm.cuh"
 #include "optimizers/Optimizers.cuh"
-
+#include "operands/Dropout.cuh"
 
 #endif //CRUSADER_SEANN_CUH

@@ -91,8 +91,8 @@ namespace seio {
         cudaFreeHost(this);
     }
     
-    Dataset* Dataset::construct(uint32 batchSize, uint32 miniBatchSize, uint32 epochSize, uint32 maxEpoch,
-                                shape4 dataShape, shape4 labelShape) {
+    Dataset* Dataset::construct(uint32 batchSize, uint32 miniBatchSize, uint32 epochSize, uint32 allDataSize,
+                                uint32 maxEpoch,shape4 dataShape, shape4 labelShape) {
         assert(batchSize > 0);
         assert(epochSize > 0);
         assert(batchSize <= epochSize);
@@ -108,7 +108,7 @@ namespace seio {
         cudaMallocHost(&out->dataBatch[0], (batchSize/miniBatchSize) * sizeof(Data*));
         cudaMallocHost(&out->dataBatch[1], (batchSize/miniBatchSize) * sizeof(Data*));
         
-        cudaMallocHost(&out->dataset, epochSize * sizeof(Data*));
+        cudaMallocHost(&out->dataset, allDataSize * sizeof(Data*));
         
         shape4 procDataShape = {miniBatchSize, dataShape.c, dataShape.h, dataShape.w};
         shape4 procLabelShape = {miniBatchSize, labelShape.c, labelShape.h, labelShape.w};
@@ -118,7 +118,7 @@ namespace seio {
             out->dataBatch[1][i] = Data::declare(procDataShape, procLabelShape)->instantiate();
         }
         
-        for(uint32 i = 0; i < out->EPOCH_SIZE; i++){
+        for(uint32 i = 0; i < allDataSize; i++){
             out->dataset[i] = Data::declare(dataShape, labelShape);
         }
         
@@ -193,5 +193,35 @@ namespace seio {
     //while training is running on the current batch
     thread Dataset::genBatchAsync() {
         return thread(genBatchThread, this);
+    }
+    
+    void Dataset::allocTestSet(uint32 testSetSize) {
+        assert(testSetSize % MINI_BATCH_SIZE == 0);
+        cudaMallocHost(&testset, testSetSize * sizeof(Data*));
+        shape4 procDataShape = {MINI_BATCH_SIZE, dataShape.c, dataShape.h, dataShape.w};
+        shape4 procLabelShape = {MINI_BATCH_SIZE, labelShape.c, labelShape.h, labelShape.w};
+        TEST_SIZE = testSetSize;
+        
+        for(uint32 i = 0; i < testSetSize / MINI_BATCH_SIZE; i++){
+            //directly alloc the testset onto the GPU
+            testset[i] = Data::declare(procDataShape, procLabelShape)->instantiate();
+            
+            //copy data to CUDA memory
+            for (int proc = 0; proc < MINI_BATCH_SIZE; proc++) {
+                cudaMemcpy(testset[i]->X->elements + dataShape.size * proc,
+                           dataset[EPOCH_SIZE + i * MINI_BATCH_SIZE + proc]->X->elements,
+                           dataShape.size * sizeof(float),
+                           cudaMemcpyHostToDevice);
+            }
+            assertCuda(__FILE__, __LINE__);
+    
+            for (int proc = 0; proc < MINI_BATCH_SIZE; proc++) {
+                cudaMemcpy(testset[i]->label->elements + labelShape.size * proc,
+                           dataset[EPOCH_SIZE + i * MINI_BATCH_SIZE + proc]->label->elements,
+                           labelShape.size * sizeof(float),
+                           cudaMemcpyHostToDevice);
+            }
+            assertCuda(__FILE__, __LINE__);
+        }
     }
 } // seann

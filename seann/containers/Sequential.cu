@@ -80,9 +80,11 @@ namespace seann {
     }
 
 //this train method does not support BN
-    void Sequential::train(Dataset *data) const {
+    void Sequential::train(Dataset *data, bool WITH_TEST, uint32 TEST_FREQUENCY) const {
         assert(data->BATCH_SIZE > 0 && data->BATCH_SIZE % netX->A->dims.n == 0);
         data->genBatch();
+        Tensor* lossBuf = Tensor::create(netY->A->dims);
+        
         while (data->epochID < data->MAX_EPOCH) {
             uint32 batchID = data->batchID - 1;
             uint32 epochID = data->epochID;
@@ -94,15 +96,12 @@ namespace seann {
                 forward(data->dataBatch[batchID % 2][sampleID]->X);
                 backward(data->dataBatch[batchID % 2][sampleID]->label);
                 
-                float lossVal = lossFW(netY, data->dataBatch[batchID % 2][sampleID]->label);
+                float lossVal = lossFW(netY, data->dataBatch[batchID % 2][sampleID]->label, lossBuf);
                 batchLoss += lossVal;
                 learn();
             }
             
-            
-            if (data->batchID % 1 == 0) {
-                cout << batchLoss / (float) data->BATCH_SIZE << ", ";
-            }
+            cout << batchLoss / (float) data->BATCH_SIZE << ", ";
             
             //BGD updates
             learnBatch();
@@ -111,6 +110,18 @@ namespace seann {
             if (data->epochID != epochID) {
                 for (int i = 0; i < OPERAND_COUNT; i++) {
                     operands[i]->zeroGrads();
+                }
+            }
+            
+            if(WITH_TEST){
+                if(data->batchID % TEST_FREQUENCY == 0){
+                    float lossVal = 0;
+                    for(int i = 0; i < data->TEST_SIZE/data->MINI_BATCH_SIZE; i++){
+                        forward(data->testset[i]->X);
+                        lossVal += lossFW(netY, data->testset[i]->label, lossBuf);
+                    }
+                    lossVal /= (float) data->TEST_SIZE;
+                    cout << lossVal << ",";
                 }
             }
         }

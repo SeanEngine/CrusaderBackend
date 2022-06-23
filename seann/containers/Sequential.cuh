@@ -48,7 +48,7 @@ namespace seann{
         
         void learnBatch() const;
         
-        void train(Dataset* data) const;
+        void train(Dataset* data, bool WITH_TEST, uint32 TEST_FREQUENCY) const;
     };
 }
 

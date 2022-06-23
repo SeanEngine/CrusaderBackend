@@ -9,11 +9,11 @@
 
 namespace seblas {
     typedef void(*LossFunc)(Parameter*, Tensor*);
-    typedef float(*LossFuncCalc)(Parameter*, Tensor*);
+    typedef float(*LossFuncCalc)(Parameter*, Tensor*, Tensor* buf);
     
     void crossEntropyLoss(Parameter* Y, Tensor* labels);
     
-    float crossEntropyCalc(Parameter* Y, Tensor* buf);
+    float crossEntropyCalc(Parameter* Y, Tensor* labels, Tensor* buf);
 } // seblas
 
 #endif //CRUSADER_CULOSS_CUH

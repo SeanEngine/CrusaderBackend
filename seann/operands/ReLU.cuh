@@ -11,14 +11,16 @@ namespace seann {
     class ReLU : public OperandBase {
     public:
         uint32 INPUT_SIZE{};
+        uint32 PARALELL_SIZE{};
         ReLU() {}
         
         string info() override {
-            return "ReLU          { " + std::to_string(INPUT_SIZE) + " }";
+            return "ReLU          { " + std::to_string(INPUT_SIZE/PARALELL_SIZE) + " }";
         }
         
         void initNetParams(OptimizerInfo *info, shape4 inShape) override{
             INPUT_SIZE = inShape.size;
+            PARALELL_SIZE = inShape.n;
             X = Parameter::declare(inShape);
             Y = Parameter::create(inShape);
         }

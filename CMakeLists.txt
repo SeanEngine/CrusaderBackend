@@ -15,7 +15,6 @@ add_executable(Crusader main.cu
 
         seblas/assist/CudaAssert.cu
         seblas/assist/CudaAssert.cuh
-
         seblas/tensor/Tensor.cu
         seblas/tensor/Tensor.cuh
         seblas/tensor/TensorUtils.cu
@@ -24,7 +23,6 @@ add_executable(Crusader main.cu
         seblas/tensor/Parameter.cuh
         seblas/assist/Inspections.cu
         seblas/assist/Inspections.cuh
-
         seblas/operations/cuGEMM.cu
         seblas/operations/cuGEMM.cuh
         seblas/operations/cuLinear.cu
@@ -81,7 +79,7 @@ add_executable(Crusader main.cu
         seio/data/DataLoader.cu
         seio/data/DataLoader.cuh
         seann/seann.cuh
-        )
+        seann/containers/Block.cu seann/containers/Block.cuh seblas/operations/cuDropout.cu seblas/operations/cuDropout.cuh seann/operands/Dropout.cu seann/operands/Dropout.cuh)
 
 include_directories(${CUDNN_PATH}/include)
 link_directories(${CUDNN_PATH} ${CUDNN_PATH}/bin ${CUDNN_PATH}/lib/x64 ${CUDNN_PATH}/dec/dll_x64)

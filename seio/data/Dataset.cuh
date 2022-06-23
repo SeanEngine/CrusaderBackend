@@ -50,11 +50,13 @@ namespace seio {
         
         //onHost : supports epoch operations
         Data** dataset;
+        Data** testset;
         
         uint32 BATCH_SIZE;
         uint32 EPOCH_SIZE;
         uint32 MAX_EPOCH;
         uint32 MINI_BATCH_SIZE;
+        uint32 TEST_SIZE;
         
         uint32 batchID = 0;
         uint32 epochID = 0;
@@ -64,7 +66,10 @@ namespace seio {
         shape4 labelShape;
         
         static Dataset* construct(uint32 batchSize,uint32 miniBatchSize, uint32 epochSize,
-                                  uint32 maxEpoch, shape4 dataShape, shape4 labelShape);
+                                  uint32 allDataSize, uint32 maxEpoch, shape4 dataShape, shape4 labelShape);
+        
+        //The test set will be the last few instances of the input dataset
+        void allocTestSet(uint32 testSetSize);
         
         //generate a data batch
         void genBatch();
