@@ -151,8 +151,8 @@ void linearUnitTest(){
                 for (uint32 i = 0; i < tmp1->dims.size; i++){
                     if(abs(tmp1->elements[i] - tmp2->elements[i]) > 0.001){
                         cout << "Error: " << tmp1->elements[i] << " != " << tmp2->elements[i] <<" "<<i<< endl;
-                        inspect(tmp1);
-                        inspect(tmp2);
+                        //inspect(tmp1);
+                        //inspect(tmp2);
                         exit(1);
                     }
                 }
@@ -180,8 +180,8 @@ void convUnitTest(){
     
     for(uint32 featureDim = 4; featureDim < 65; featureDim *=2){
         for(uint32 filterDim = 1; filterDim < featureDim; filterDim *=2){
-            for(uint32 c1Dim = 1; c1Dim < 129; c1Dim *=2){
-                for(uint32 c2Dim = 1; c2Dim < 129; c2Dim *=2){
+            for(uint32 c1Dim = 1; c1Dim < 257; c1Dim *=2){
+                for(uint32 c2Dim = 1; c2Dim < 257; c2Dim *=2){
                     for (uint32 nDim = 1; nDim < 256; nDim *=2){
                         cout<<"Stage began: "<< featureDim << " " << filterDim << " " << c1Dim << " " << c2Dim << " " <<nDim<<endl;
     
@@ -191,10 +191,10 @@ void convUnitTest(){
                         shape4 outDims = {nDim, c2Dim,
                                           (featureDim - filterDim)/stride + 1,
                                           (featureDim - filterDim)/stride + 1};
-                        Tensor* dX = Tensor::declare(inDim)->instantiate()->randNormal(1, 20);
-                        Tensor* dW = Tensor::declare(filterDims)->instantiate();
-                        Tensor* dY = Tensor::declare(outDims)->instantiate()->randNormal(1, 20);
-                        Tensor* dWPrime = Tensor::declare(filterDims)->instantiate();
+                        Tensor* dX = Tensor::declare(inDim)->instantiate();
+                        Tensor* W = Tensor::declare(filterDims)->instantiate()->randNormal(40, 10);
+                        Tensor* dY = Tensor::declare(outDims)->instantiate()->randNormal(40, 10);
+                        Tensor* dxPrime = Tensor::declare(inDim)->instantiate();
                         
                         //cudnn validation:
                         cudnnTensorDescriptor_t input_descriptor;
@@ -241,26 +241,26 @@ void convUnitTest(){
                                 /*computeType=*/CUDNN_DATA_FLOAT));
 
                         const float alpha = 1, beta = 0;
-                        cudnnConvolutionBackwardFilter(
+                        checkCUDNN(cudnnConvolutionBackwardData(
                                 cudnn,
-                                &alpha,
-                                input_descriptor,
-                                dX->elements,
-                                output_descriptor,
-                                dY->elements,
-                                convolution_descriptor,
-                                CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0,
-                                nullptr,
-                                0,
-                                &beta,
-                                kernel_descriptor,
-                                dWPrime->elements
-                                );
+                                /*alpha=*/&alpha,
+                                /*wDesc=*/kernel_descriptor,
+                                /*w=*/W->elements,
+                                /*dyDesc=*/output_descriptor,
+                                /*dy=*/dY->elements,
+                                /*convDesc=*/convolution_descriptor,
+                                /*algo=*/CUDNN_CONVOLUTION_BWD_DATA_ALGO_0,
+                                /*workSpace=*/nullptr,
+                                /*workSpaceSizeInBytes=*/0,
+                                /*beta=*/&beta,
+                                /*dxDesc=*/input_descriptor,
+                                /*dx=*/dX->elements
+                                ));
                         
-                        convError(dY, dX, dW, stride, stride, 0, 0);
+                        convDerive(W, dY, dxPrime, stride, stride, 0, 0);
                         
-                        Tensor* tmp1 = dW->ripOffDevice();
-                        Tensor* tmp2 = dWPrime->ripOffDevice();
+                        Tensor* tmp1 = dX->ripOffDevice();
+                        Tensor* tmp2 = dxPrime->ripOffDevice();
     
                         for (uint32 i = 0; i < tmp1->dims.size; i++) {
                             if (abs(tmp1->elements[i] - tmp2->elements[i])/abs(tmp1->elements[i]) > 0.01
@@ -276,9 +276,9 @@ void convUnitTest(){
                         }
                         
                         dX->eliminate();
-                        dW->eliminate();
+                        W->eliminate();
                         dY->eliminate();
-                        dWPrime->eliminate();
+                        dxPrime->eliminate();
                         
                         tmp1->eliminateHost();
                         tmp2->eliminateHost();

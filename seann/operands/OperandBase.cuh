@@ -36,6 +36,10 @@ namespace seann {
         
         virtual void randFillNetParams() = 0;
         
+        virtual void inferenceForward(){
+            forward();
+        };
+        
         virtual void zeroGrads() = 0;
         
         virtual string info() = 0;

@@ -2,27 +2,27 @@
 // Created by Dylan on 6/20/2022.
 //
 
-#ifndef CRUSADER_SOFTMAX_CUH
-#define CRUSADER_SOFTMAX_CUH
+#ifndef CRUSADER_RELU_CUH
+#define CRUSADER_RELU_CUH
 
-#include "OperandBase.cuh"
+#include "../OperandBase.cuh"
 
 namespace seann {
-    class Softmax : public OperandBase {
+    class ReLU : public OperandBase {
     public:
         uint32 INPUT_SIZE{};
-        Tensor* reduceBuffer{};
-        Softmax(){}
+        uint32 PARALELL_SIZE{};
+        ReLU() {}
         
         string info() override {
-            return "Softmax       { " + to_string(INPUT_SIZE) + " }";
+            return "ReLU          { " + std::to_string(INPUT_SIZE/PARALELL_SIZE) + " }";
         }
         
         void initNetParams(OptimizerInfo *info, shape4 inShape) override{
-            INPUT_SIZE = inShape.size / inShape.n;
-            X = Parameter::declare(inShape.n, 1, INPUT_SIZE, 1);
-            Y = Parameter::create(inShape.n, 1, INPUT_SIZE, 1);
-            reduceBuffer = INPUT_SIZE / 1024 > 0 ? Tensor::create(INPUT_SIZE,1) : nullptr;
+            INPUT_SIZE = inShape.size;
+            PARALELL_SIZE = inShape.n;
+            X = Parameter::declare(inShape);
+            Y = Parameter::create(inShape);
         }
         
         void forward() override;
@@ -39,6 +39,7 @@ namespace seann {
         
         void zeroGrads() override{}
     };
+    
 } // seann
 
-#endif //CRUSADER_SOFTMAX_CUH
+#endif //CRUSADER_RELU_CUH

@@ -22,4 +22,9 @@ namespace seann {
     string Dropout::info() {
         return "Dropout";
     }
+    
+    void Dropout::inferenceForward() {
+        X->A->copyToD2D(Y->A);
+        *Y->A * p;
+    }
 } // seann

@@ -5,7 +5,7 @@
 #ifndef CRUSADER_DROPOUT_CUH
 #define CRUSADER_DROPOUT_CUH
 
-#include "OperandBase.cuh"
+#include "../OperandBase.cuh"
 
 namespace seann {
     
@@ -35,6 +35,8 @@ namespace seann {
         void randFillNetParams() override{}
         
         void initNetParams(OptimizerInfo *info, shape4 inShape) override;
+        
+        void inferenceForward() override;
     };
 } // seann
 

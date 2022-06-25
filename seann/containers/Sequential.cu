@@ -47,6 +47,21 @@ namespace seann {
         return netY->A;
     }
     
+    Tensor *Sequential::inferenceForward() const {
+        for (int i = 0; i < OPERAND_COUNT; i++) {
+            operands[i]->inferenceForward();
+        }
+        return netY->A;
+    }
+    
+    Tensor *Sequential::inferenceForward(Tensor *X) const {
+        X->copyToD2D(netX->A);
+        for (int i = 0; i < OPERAND_COUNT; i++) {
+            operands[i]->inferenceForward();
+        }
+        return netY->A;
+    }
+    
     void Sequential::randInit() const {
         for (int i = 0; i < OPERAND_COUNT; i++) {
             operands[i]->randFillNetParams();
@@ -91,6 +106,9 @@ namespace seann {
             auto pass = data->genBatchAsync();
             float batchLoss = 0;
             
+            LARGE_INTEGER freq, beg, end;
+            QueryPerformanceFrequency(&freq);
+            
             //training over each sample in the batch
             for (uint32 sampleID = 0; sampleID < data->BATCH_SIZE / data->MINI_BATCH_SIZE; sampleID ++) {
                 forward(data->dataBatch[batchID % 2][sampleID]->X);
@@ -117,7 +135,7 @@ namespace seann {
                 if(data->batchID % TEST_FREQUENCY == 0){
                     float lossVal = 0;
                     for(int i = 0; i < data->TEST_SIZE/data->MINI_BATCH_SIZE; i++){
-                        forward(data->testset[i]->X);
+                        inferenceForward(data->testset[i]->X);
                         lossVal += lossFW(netY, data->testset[i]->label, lossBuf);
                     }
                     lossVal /= (float) data->TEST_SIZE;

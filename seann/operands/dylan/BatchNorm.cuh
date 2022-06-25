@@ -5,7 +5,7 @@
 #ifndef CRUSADER_BATCHNORM_CUH
 #define CRUSADER_BATCHNORM_CUH
 
-#include "OperandBase.cuh"
+#include "../OperandBase.cuh"
 
 namespace seann {
     class BatchNorm : public OperandBase {

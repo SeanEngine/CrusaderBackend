@@ -5,7 +5,7 @@
 #ifndef CRUSADER_CONV2D_CUH
 #define CRUSADER_CONV2D_CUH
 
-#include "OperandBase.cuh"
+#include "../OperandBase.cuh"
 
 namespace seann {
     class Conv2D : public OperandBase {

@@ -5,7 +5,7 @@
 #ifndef CRUSADER_LINEAR_CUH
 #define CRUSADER_LINEAR_CUH
 
-#include "OperandBase.cuh"
+#include "../OperandBase.cuh"
 
 namespace seann {
     class Linear : public OperandBase {

@@ -19,8 +19,7 @@ namespace seann {
     }
     
     void BatchNorm::paramGrads() {
-        batchNormParamGrads(Y->dA,  beta->grad(),
-               gamma->grad(), X->A);
+        batchNormParamGrads(Y->dA,  beta->grad(),gamma->grad(), X->A);
     }
     
     void BatchNorm::updateParams() {

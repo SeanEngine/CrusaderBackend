@@ -62,24 +62,24 @@ add_executable(Crusader main.cu
         seann/containers/NetParam.cuh
         seann/operands/OperandBase.cu
         seann/operands/OperandBase.cuh
-        seann/operands/Linear.cu
-        seann/operands/Linear.cuh
-        seann/operands/Conv2D.cu
-        seann/operands/Conv2D.cuh
-        seann/operands/BatchNorm.cu
-        seann/operands/BatchNorm.cuh
-        seann/operands/MaxPool2D.cu
-        seann/operands/MaxPool2D.cuh
-        seann/operands/ReLU.cu
-        seann/operands/ReLU.cuh
-        seann/operands/Softmax.cu
-        seann/operands/Softmax.cuh
+        seann/operands/dylan/Linear.cu
+        seann/operands/dylan/Linear.cuh
+        seann/operands/dylan/Conv2D.cu
+        seann/operands/dylan/Conv2D.cuh
+        seann/operands/dylan/BatchNorm.cu
+        seann/operands/dylan/BatchNorm.cuh
+        seann/operands/dylan/MaxPool2D.cu
+        seann/operands/dylan/MaxPool2D.cuh
+        seann/operands/dylan/ReLU.cu
+        seann/operands/dylan/ReLU.cuh
+        seann/operands/dylan/Softmax.cu
+        seann/operands/dylan/Softmax.cuh
         seio/data/Dataset.cu
         seio/data/Dataset.cuh
         seio/data/DataLoader.cu
         seio/data/DataLoader.cuh
         seann/seann.cuh
-        seann/containers/Block.cu seann/containers/Block.cuh seblas/operations/cuDropout.cu seblas/operations/cuDropout.cuh seann/operands/Dropout.cu seann/operands/Dropout.cuh)
+        seann/containers/Block.cu seann/containers/Block.cuh seblas/operations/cuDropout.cu seblas/operations/cuDropout.cuh seann/operands/dylan/Dropout.cu seann/operands/dylan/Dropout.cuh seann/operands/cudnn/cuConv2D.cu seann/operands/cudnn/cuConv2D.cuh)
 
 include_directories(${CUDNN_PATH}/include)
 link_directories(${CUDNN_PATH} ${CUDNN_PATH}/bin ${CUDNN_PATH}/lib/x64 ${CUDNN_PATH}/dec/dll_x64)

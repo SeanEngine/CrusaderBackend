@@ -17,6 +17,7 @@
 
 #include "../../seutil/exec/ThreadController.cuh"
 #include "../assist/CudaAssert.cuh"
+#include "cudnn.h"
 
 #define CPU_THREADS 20
 
@@ -90,11 +91,16 @@ namespace seblas{
         shape4 dims;
         float* elements = nullptr;
         int deviceId = 0;
+        cudnnTensorDescriptor_t cudnnDesc;
 
         static Tensor* declare(shape4 dims) {
             Tensor *construct;
             cudaMallocHost(&construct, sizeof(Tensor));
             construct->dims = dims;
+    
+            cudnnCreateTensorDescriptor(&construct->cudnnDesc);
+            construct->setCudnnDesc();
+            
             return construct;
         }
     
@@ -125,6 +131,7 @@ namespace seblas{
         Tensor* reshape(shape4 dim) {
             assert(dim.size == this->dims.size);
             this->dims = dim;
+            setCudnnDesc();
             return this;
         }
 
@@ -183,6 +190,17 @@ namespace seblas{
         Tensor* constFill(float val);
         Tensor* randUniform(float min, float max);
         Tensor* randNormal(float mean, float stddev);
+        
+        //setup cudnn connections
+        void setCudnnDesc(){
+            cudnnSetTensor4dDescriptor(cudnnDesc,
+                                CUDNN_TENSOR_NCHW,
+                                CUDNN_DATA_FLOAT,
+                                       (int)dims.n,
+                                       (int)dims.c,
+                                       (int)dims.h,
+                                       (int)dims.w);
+        }
 
         //access
         __host__ float get(uint32 offset) const;

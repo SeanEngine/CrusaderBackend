@@ -296,7 +296,7 @@ namespace seblas{
         float bufferB[BLOCK_N * BLOCK_K / threadCount] = {0};
         
         ///prepare configs for reading global
-        float* ptrA = A->elements + blockIdx.y * BLOCK_M * K;
+        float* ptrA = A->elements;
         float* ptrB = B->elements;
         const int blockM = blockIdx.y * BLOCK_M;
         const int blockN = blockIdx.x * BLOCK_N;
@@ -319,7 +319,7 @@ namespace seblas{
         #pragma unroll
         for(int i=0; i<BLOCK_M; i+= readRowStrideA){
             int rowFilterIndex = readColA / (FH * FW);
-            int colFilterIndex = readRowA + i;
+            int colFilterIndex = blockM + readRowA + i;
             int colIndex = (FH * FW - 1) - (readColA % (FH * FW));
             if(blockM + readRowA + i < M && readColA < K){
                 //rotate 180 degrees
@@ -375,7 +375,7 @@ namespace seblas{
                 for (int i = 0; i < BLOCK_M; i += readRowStrideA) {
                     int loadIndex = i / readRowStrideA;
                     int rowFilterIndex = (readColA + nextTileID) / (FH * FW);
-                    int colFilterIndex = readRowA + i;
+                    int colFilterIndex = blockM + readRowA + i;
                     int colIndex = (FH * FW - 1) - ((readColA + nextTileID) % (FH * FW));
                     bufferA[loadIndex] = blockM + readRowA + i < M && readColA + nextTileID < K ?
                                          ptrA[rowFilterIndex * SRC_K + colFilterIndex * (FH * FW) + colIndex] : 0;

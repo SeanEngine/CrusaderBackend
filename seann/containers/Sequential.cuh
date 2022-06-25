@@ -41,7 +41,11 @@ namespace seann{
         Tensor* forward() const;
         
         Tensor* forward(Tensor* X) const;
-        
+    
+        Tensor* inferenceForward() const;
+    
+        Tensor* inferenceForward(Tensor *X) const;
+    
         Tensor* backward(Tensor* labelY) const;
         
         void learn() const;
