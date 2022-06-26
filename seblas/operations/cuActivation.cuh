@@ -15,6 +15,8 @@ namespace seblas {
     // relu derivative
     Tensor* reluGrad(Tensor* X, Tensor* outX);
     
+    Tensor* reluGradFast(Tensor* Z, Tensor* dY, Tensor* dZ);
+    
     // lRelu activation
     Tensor* lRelu(Tensor* X, Tensor* outX, float alpha);
     

@@ -12,7 +12,7 @@ namespace seblas{
     
     template<const uint32 BLOCK, const uint32 MAX_PARALLEL>
     __global__ void batchNormD(Tensor* X, Tensor* beta, Tensor* gamma,
-                               Tensor* mean, Tensor* var, Tensor* Y){
+                               Tensor* mean, Tensor* var, Tensor* Y, Tensor* xHat){
         const uint32 idx = blockIdx.x * blockDim.x + threadIdx.x;
         if(idx >= X->dims.size /X->dims.n ) return;
         
@@ -48,10 +48,11 @@ namespace seblas{
         #pragma unroll
         for(uint32 depth = 0; depth < X->dims.n; depth++){
             float xVal = xs[threadIdx.x * MAX_PARALLEL + depth];
-            float xHat = (xVal - meanVal) / (float)sqrt(varVal + 1e-8);
+            float xHatVal = (xVal - meanVal) / (float)sqrt(varVal + 1e-8);
             float betaVal = beta->elements[idx];
             float gammaVal = gamma->elements[idx];
-            Y->elements[depth * (Y->dims.size / Y->dims.n) + idx] = xHat * gammaVal + betaVal;
+            Y->elements[depth * (Y->dims.size / Y->dims.n) + idx] = xHatVal * gammaVal + betaVal;
+            xHat->elements[depth * (xHat->dims.size / xHat->dims.n) + idx] = xHatVal;
         }
         __syncthreads();
         
@@ -124,51 +125,21 @@ namespace seblas{
     }
     
     template<const uint32 BLOCK, const uint32 MAX_PARALLEL>
-    __global__ void batchNormParamGradsD(Tensor* dY, Tensor* dGamma, Tensor* dBeta,
-                                         Tensor* X){
+    __global__ void batchNormParamGradsD(Tensor* dY, Tensor* xHat, Tensor* dGamma, Tensor* dBeta){
         const uint32 idx = blockIdx.x * blockDim.x + threadIdx.x;
         if(idx >= dY->dims.size /dY->dims.n ) return;
         
         float dGammaVal = 0;
         float dBetaVal = 0;
-        
-        //since each SM has access to 163KB of shared memory
-        __shared__ float xs[BLOCK * MAX_PARALLEL];
-        float meanVal = 0;
-        float varVal = 0;
-    
-        #pragma unroll
-        for(uint32 i = 0; i < MAX_PARALLEL; i++){
-            xs[i * BLOCK + threadIdx.x] = 0;
-        }
-        __syncthreads();
-    
-        //load data into shared memory
-        #pragma unroll
-        for(uint32 depth = 0; depth < X->dims.n; depth++){
-            float xVal = X->elements[depth * (X->dims.size/X->dims.n) + idx];
-            xs[threadIdx.x * MAX_PARALLEL + depth] = xVal;
-            meanVal += xVal;
-        }
-        meanVal /= (float)X->dims.n;
-    
-        //compute variance
-        #pragma unroll
-        for(uint32 depth = 0; depth < X->dims.n; depth++){
-            float xVal = xs[threadIdx.x * MAX_PARALLEL + depth];
-            varVal += (xVal - meanVal) * (xVal - meanVal);
-        }
-        varVal /= ((float)X->dims.n);
     
         //compute xHat
         #pragma unroll
-        for(uint32 depth = 0; depth < X->dims.n; depth++){
-            float xVal = xs[threadIdx.x * MAX_PARALLEL + depth];
-            float xHat = (xVal - meanVal) / (float)sqrt(varVal + 1e-8);
+        for(uint32 depth = 0; depth < xHat->dims.n; depth++){
+            float xHatVal = xHat->elements[depth * (xHat->dims.size/xHat->dims.n) + idx];
             float dy = dY->elements[depth * (dY->dims.size/dY->dims.n) + idx];
             
             dBetaVal += dy;
-            dGammaVal += dy * xHat;
+            dGammaVal += dy * xHatVal;
         }
         
         dBeta->elements[idx] = dBetaVal;
@@ -177,7 +148,7 @@ namespace seblas{
     
     //[UNP] when batchsize < 2, results are different from cudnn
     Tensor* batchNorm(Tensor* X, Tensor* beta, Tensor* gamma,
-                      Tensor* mean, Tensor* var, Tensor* Y){
+                      Tensor* mean, Tensor* var, Tensor* Y, Tensor* xHat){
         assert(X->dims.n == Y->dims.n);
         assert(X->dims.size == Y->dims.size);
         assert(X->dims.n <= BATCH_NORM_MAX_PARALLEL);
@@ -185,7 +156,7 @@ namespace seblas{
         uint32 block = BATCH_NORM_BLOCK;
         uint32 grid = ((X->dims.size / X->dims.n) + block - 1) / block;
         
-        batchNormD<BATCH_NORM_BLOCK,BATCH_NORM_MAX_PARALLEL><<<grid, block>>>(X, beta, gamma, mean, var, Y);
+        batchNormD<BATCH_NORM_BLOCK,BATCH_NORM_MAX_PARALLEL><<<grid, block>>>(X, beta, gamma, mean, var, Y, xHat);
         cudaDeviceSynchronize();
         assertCuda(__FILE__, __LINE__);
         return Y;
@@ -205,16 +176,15 @@ namespace seblas{
         return dX;
     }
     
-    void batchNormParamGrads(Tensor* dY, Tensor* dGamma, Tensor* dBeta,
-                             Tensor* X){
-        assert(dY->dims.n == X->dims.n);
-        assert(dY->dims.size == X->dims.size);
+    void batchNormParamGrads(Tensor* dY, Tensor* xHat, Tensor* dGamma, Tensor* dBeta){
+        assert(dY->dims.n == xHat->dims.n);
+        assert(dY->dims.size == xHat->dims.size);
         
         uint32 block = BATCH_NORM_BLOCK;
-        uint32 grid = ((X->dims.size / X->dims.n) + block - 1) / block;
+        uint32 grid = ((xHat->dims.size / xHat->dims.n) + block - 1) / block;
         
         batchNormParamGradsD<BATCH_NORM_BLOCK, BATCH_NORM_MAX_PARALLEL>
-                <<<grid, block>>>(dY, dGamma, dBeta, X);
+                <<<grid, block>>>(dY, xHat, dGamma, dBeta);
         cudaDeviceSynchronize();
         assertCuda(__FILE__, __LINE__);
     }

@@ -14,6 +14,7 @@ namespace seann {
         NetParam* gamma{};
         Tensor* mean{};
         Tensor* variance{};
+        Tensor* xHatP{};
         
         BatchNorm() : OperandBase() {}
         
@@ -24,6 +25,7 @@ namespace seann {
             
             mean = Tensor::create(paramShape);
             variance = Tensor::create(paramShape);
+            xHatP = Tensor::create(inShape);
             
             X = Parameter::declare(inShape);
             Y = Parameter::create(inShape);

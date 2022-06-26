@@ -26,8 +26,6 @@ void convUnitTest();
 
 void optimUnitTest();
 
-void batchnormUnitTest();
-
 void softmaxUnitTest();
 
 Tensor* simpleGemm(Tensor* A, Tensor* B, Tensor* C);

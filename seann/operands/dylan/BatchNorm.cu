@@ -11,7 +11,7 @@ namespace seann {
     }
     
     void BatchNorm::forward() {
-        batchNorm(X->A, beta->data(), gamma->data(), mean, variance, Y->A);
+        batchNorm(X->A, beta->data(), gamma->data(), mean, variance, Y->A, xHatP);
     }
     
     void BatchNorm::xGrads() {
@@ -19,7 +19,7 @@ namespace seann {
     }
     
     void BatchNorm::paramGrads() {
-        batchNormParamGrads(Y->dA,  beta->grad(),gamma->grad(), X->A);
+        batchNormParamGrads(Y->dA, xHatP,  beta->grad(),gamma->grad());
     }
     
     void BatchNorm::updateParams() {
