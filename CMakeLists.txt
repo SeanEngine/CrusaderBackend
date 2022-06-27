@@ -79,7 +79,7 @@ add_executable(Crusader main.cu
         seio/data/DataLoader.cu
         seio/data/DataLoader.cuh
         seann/seann.cuh
-        seann/containers/Block.cu seann/containers/Block.cuh seblas/operations/cuDropout.cu seblas/operations/cuDropout.cuh seann/operands/dylan/Dropout.cu seann/operands/dylan/Dropout.cuh seann/operands/cudnn/cuConv2D.cu seann/operands/cudnn/cuConv2D.cuh)
+        seann/containers/Block.cu seann/containers/Block.cuh seblas/operations/cuDropout.cu seblas/operations/cuDropout.cuh seann/operands/dylan/Dropout.cu seann/operands/dylan/Dropout.cuh seann/operands/cudnn/cuConv2D.cu seann/operands/cudnn/cuConv2D.cuh seio/data/DataTransform.cu seio/data/DataTransform.cuh seio/data/DataAugmentor.cu seio/data/DataAugmentor.cuh seio/data/Data.cu seio/data/Data.cuh)
 
 include_directories(${CUDNN_PATH}/include)
 link_directories(${CUDNN_PATH} ${CUDNN_PATH}/bin ${CUDNN_PATH}/lib/x64 ${CUDNN_PATH}/dec/dll_x64)

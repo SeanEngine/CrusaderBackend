@@ -4,7 +4,6 @@
 
 #include "DataLoader.cuh"
 
-#define RGB_DECAY (1.0f/256.0f)
 #define toLittleEndian(i) ((i>>24)&0xFF) | ((i>>8)&0xFF00) | ((i<<8)&0xFF0000) | ((i<<24)&0xFF000000)
 
 
@@ -39,7 +38,7 @@ namespace seio {
     Tensor* fetchBinImage(const BYTE* buffer, uint32 offset, shape4 dims){
         Tensor* image = Tensor::createHost(dims);
         for(uint32 i = 0; i < image->dims.size; i++){
-            image->elements[i] = (float)buffer[offset + i] * RGB_DECAY;
+            image->elements[i] = (float)buffer[offset + i];
         }
         return image;
     }

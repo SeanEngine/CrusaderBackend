@@ -106,9 +106,6 @@ namespace seann {
             auto pass = data->genBatchAsync();
             float batchLoss = 0;
             
-            LARGE_INTEGER freq, beg, end;
-            QueryPerformanceFrequency(&freq);
-            
             //training over each sample in the batch
             for (uint32 sampleID = 0; sampleID < data->BATCH_SIZE / data->MINI_BATCH_SIZE; sampleID ++) {
                 forward(data->dataBatch[batchID % 2][sampleID]->X);

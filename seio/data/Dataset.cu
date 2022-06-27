@@ -3,92 +3,18 @@
 //
 
 #include "Dataset.cuh"
+#include "../../seblas/assist/Inspections.cuh"
 
 namespace seio {
-    Data *Data::declare(shape4 dataShape, shape4 labelShape) {
-        Data* out;
-        cudaMallocHost(&out, sizeof(Data));
-        out->X = Tensor::declare(dataShape);
-        out->label = Tensor::declare(labelShape);
-        return out;
-    }
     
-    Data *Data::instantiate() {
-        X->instantiate();
-        label->instantiate();
-        return this;
-    }
-    
-    Data *Data::instantiateHost() {
-        X->instantiateHost();
-        label->instantiateHost();
-        return this;
-    }
-    
-    Data *Data::inherit(Tensor *X0, Tensor *label0) {
-        X->attach(X0);
-        label->attach(label0);
-        return this;
-    }
-    
-    Data *Data::copyOffD2D(Data *onDevice) {
-        onDevice->X->copyToD2D(X);
-        onDevice->label->copyToD2D(label);
-        return this;
-    }
-    
-    Data *Data::copyOffH2D(Data *onHost) {
-        onHost->X->copyToH2D(X);
-        onHost->label->copyToH2D(label);
-        return this;
-    }
-    
-    Data *Data::copyOffD2H(Data *onDevice) {
-        onDevice->X->copyToD2H(X);
-        onDevice->label->copyToD2H(label);
-        return this;
-    }
-    
-    Data *Data::copyOffH2H(Data *onHost) {
-        onHost->X->copyToH2H(X);
-        onHost->label->copyToH2H(label);
-        return this;
-    }
-    
-    Data *Data::copyOffD2D(Tensor *X0, Tensor *label0) {
-        X0->copyToD2D(X);
-        label0->copyToD2D(label);
-        return this;
-    }
-    
-    Data *Data::copyOffH2D(Tensor *X0, Tensor *label0) {
-        X0->copyToH2D(X);
-        label0->copyToH2D(label);
-        return this;
-    }
-    
-    Data *Data::copyOffD2H(Tensor *X0, Tensor *label0) {
-        X0->copyToD2H(X);
-        label0->copyToD2H(label);
-        return this;
-    }
-    
-    Data *Data::copyOffH2H(Tensor *X0, Tensor *label0) {
-        X0->copyToH2H(X);
-        label0->copyToH2H(label);
-        return this;
-    }
-    
-    void Data::destroy() {
-        X->destroy();
-        label->destroy();
-        cudaFree(this);
-    }
-    
-    void Data::destroyHost() {
-        X->destroyHost();
-        label->destroyHost();
-        cudaFreeHost(this);
+    void transformThread(int tid, int tc, Dataset* set){
+        uint32 beg = tid * (set->EPOCH_SIZE / tc);
+        uint32 end = tid == tc - 1 ? set->EPOCH_SIZE : beg + (set->EPOCH_SIZE / tc);
+        for(uint32 i = beg; i < end; i++){
+            for(uint32 step = 0; step < set->preProcStepCount; step++){
+                set->dataset[i]->X = set->preProc[step]->apply(set->dataset[i]->X);
+            }
+        }
     }
     
     Dataset* Dataset::construct(uint32 batchSize, uint32 miniBatchSize, uint32 epochSize, uint32 allDataSize,
@@ -126,6 +52,7 @@ namespace seio {
         out->labelShape = labelShape;
         
         out->remainedData = out->EPOCH_SIZE/out->MINI_BATCH_SIZE;
+        out->batchInitializer = new BatchFormer(miniBatchSize, dataShape, labelShape);
         
         assertCuda(__FILE__, __LINE__);
         
@@ -155,25 +82,20 @@ namespace seio {
             uniform_int_distribution<uint32> distribution(0, remainedData-1);
             uint32 index = distribution(generator);
             
-            //copy data to CUDA memory
-            for (int proc = 0; proc < MINI_BATCH_SIZE; proc++) {
-                cudaMemcpy(dataBatch[batchID%2][i]->X->elements + dataShape.size * proc,
-                           dataset[index * MINI_BATCH_SIZE + proc]->X->elements,
-                           dataShape.size * sizeof(float),
-                           cudaMemcpyHostToDevice);
+            //Run augmentation steps
+            Data* src = batchInitializer->form(dataset, index);
+            for(uint32 step = 0; step < augmentationStepCount; step++){
+                src = augmentations[step]->apply(src);
             }
-            assertCuda(__FILE__, __LINE__);
-    
-            for (int proc = 0; proc < MINI_BATCH_SIZE; proc++) {
-                cudaMemcpy(dataBatch[batchID%2][i]->label->elements + labelShape.size * proc,
-                           dataset[index * MINI_BATCH_SIZE + proc]->label->elements,
-                           labelShape.size * sizeof(float),
-                           cudaMemcpyHostToDevice);
-            }
+
+            cudaMemcpy(dataBatch[batchID%2][i]->X->elements, src->X->elements,
+                       sizeof(float) * src->X->dims.size, cudaMemcpyHostToDevice);
+            cudaMemcpy(dataBatch[batchID%2][i]->label->elements, src->label->elements,
+                          sizeof(float) * src->label->dims.size, cudaMemcpyHostToDevice);
             assertCuda(__FILE__, __LINE__);
             
             //change data location to prevent repeating use of same data
-            shift(dataset, EPOCH_SIZE, index * MINI_BATCH_SIZE, MINI_BATCH_SIZE);
+            shift(dataset, EPOCH_SIZE,  index * MINI_BATCH_SIZE, MINI_BATCH_SIZE);
             remainedData --;
             
             if(remainedData == 0){
@@ -184,6 +106,8 @@ namespace seio {
         //change batchID
         batchID++;
     }
+    
+    
     
     void genBatchThread(Dataset* set) {
         set->genBatch();
@@ -223,5 +147,9 @@ namespace seio {
             }
             assertCuda(__FILE__, __LINE__);
         }
+    }
+    
+    void Dataset::runPreProc() {
+        _alloc<CPU_THREADS>(transformThread, this);
     }
 } // seann
