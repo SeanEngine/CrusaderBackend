@@ -37,6 +37,10 @@ namespace seann {
         void initNetParams(OptimizerInfo *info, shape4 inShape) override;
         
         void inferenceForward() override;
+        
+        uint32 OPERAND_ID() override {
+            return 0x0b02;
+        }
     };
 } // seann
 

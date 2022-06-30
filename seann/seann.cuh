@@ -6,14 +6,15 @@
 #define CRUSADER_SEANN_CUH
 
 #include "containers/Sequential.cuh"
-#include "operands/dylan/Conv2D.cuh"
-#include "operands/dylan/Linear.cuh"
-#include "operands/dylan/ReLU.cuh"
-#include "operands/dylan/Softmax.cuh"
-#include "operands/dylan/MaxPool2D.cuh"
-#include "operands/dylan/BatchNorm.cuh"
+#include "operands/seblas/Conv2D.cuh"
+#include "operands/seblas/Linear.cuh"
+#include "operands/seblas/ReLU.cuh"
+#include "operands/seblas/Softmax.cuh"
+#include "operands/seblas/MaxPool2D.cuh"
+#include "operands/seblas/BatchNorm.cuh"
 #include "optimizers/Optimizers.cuh"
-#include "operands/dylan/Dropout.cuh"
+#include "operands/seblas/Dropout.cuh"
+#include "operands/controlling/ShortcutEndpoint.cuh"
 
 #include "operands/cudnn/cuConv2D.cuh"
 

@@ -9,6 +9,7 @@ namespace seann {
     void Sequential::waive() const {
         for (int i = 1; i < OPERAND_COUNT; i++) {
             operands[i]->bindPrev(operands[i - 1]);
+            operands[i]->bindInput(operands[i - 1]->Y);
         }
         
         for (int i = 0; i < OPERAND_COUNT - 1; i++) {
@@ -30,6 +31,10 @@ namespace seann {
         
         //bind the layers together
         waive();
+        
+        for(int i = 0; i < OPERAND_COUNT; i++){
+            operands[i]->postWaiveInit(info);
+        }
     }
     
     Tensor *Sequential::forward() const {
@@ -137,6 +142,20 @@ namespace seann {
                     }
                     lossVal /= (float) data->TEST_SIZE;
                     cout << lossVal << ",";
+                }
+            }
+            
+            if (epochID == 40) {
+                for (int i = 0; i < OPERAND_COUNT; i++){
+                    operands[i]->updateOptimLR(operands[i]->getOptimLR() * 0.1f);
+                    operands[i]->updateL2Const(operands[i]->getL2Const() * 0.1f);
+                }
+            }
+            
+            if (epochID > 40 && epochID % 10 == 0) {
+                for (int i = 0; i < OPERAND_COUNT; i++) {
+                    operands[i]->updateOptimLR(operands[i]->getOptimLR() * 0.1f);
+                    operands[i]->updateL2Const(operands[i]->getL2Const() * 0.1f);
                 }
             }
         }

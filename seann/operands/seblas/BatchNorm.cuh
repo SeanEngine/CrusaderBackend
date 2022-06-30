@@ -46,6 +46,28 @@ namespace seann {
         void zeroGrads() override;
         
         string info() override;
+        
+        uint32 OPERAND_ID() override {
+            return 0x0b01;
+        }
+        
+        float getOptimLR() override {
+            return gamma->opt->LEARNING_RATE;
+        }
+        
+        void updateOptimLR(float lr) override {
+            gamma->opt->LEARNING_RATE = lr;
+            beta->opt->LEARNING_RATE = lr;
+        }
+        
+        float getL2Const() override {
+            return gamma->opt->L2;
+        }
+        
+        void updateL2Const(float l2) override {
+            gamma->opt->L2 = l2;
+            beta->opt->L2 = l2;
+        }
     };
     
 } // seann

@@ -9,6 +9,18 @@
 #include "../optimizers/Optimizers.cuh"
 #include "../containers/NetParam.cuh"
 
+#define OPR_SEBLAS_LINEAR 0x0a01
+#define OPR_SEBLAS_CONV2D 0x0a02
+#define OPR_CUDNN_CONV2D 0x0ad2
+#define OPR_SEBLAS_BATCHNORM 0x0b01
+#define OPR_SEBLAS_DROPOUT 0x0b02
+#define OPR_SEBLAS_MAXPOOL2D 0x0b03
+#define OPR_SEBLAS_RELU 0x0c01
+#define OPR_SEBLAS_SOFTMAX 0x0c02
+
+#define OPR_CTRL_SHORTCUT_SRC 0xf001
+#define OPR_CTRL_SHORTCUT_CTN 0xf002
+
 namespace seann {
     
     class OperandBase {
@@ -16,8 +28,8 @@ namespace seann {
         Parameter* X{};  //input, a shadow of the output of prev operand
         Parameter* Y{};  //output
         
-        OperandBase* prev{};
-        OperandBase* next{};
+        OperandBase* prev = nullptr;
+        OperandBase* next = nullptr;
         
         //calculate : X -> Y
         virtual void forward() = 0;
@@ -47,11 +59,14 @@ namespace seann {
         //X should be bind to the Y of the previous operand
         void bindPrev(OperandBase* prevPtr) {
             this->prev = prevPtr;
-            X->inherit(prevPtr->Y);
         }
         
         void bindNext(OperandBase* nextPtr) {
             this->next = nextPtr;
+        }
+        
+        void bindInput(Parameter* prevY) const{
+            this->X->inherit(prevY);
         }
         
         //grab the operands earlier in the network
@@ -62,6 +77,28 @@ namespace seann {
         OperandBase* traceNext(uint32 dist){
             return dist <= 0 ? this : next->traceNext(dist-1);
         }
+    
+        OperandBase* tracePrev() const{
+            return prev;
+        }
+        
+        OperandBase* traceNext() const{
+            return next;
+        }
+        
+        virtual uint32 OPERAND_ID(){
+            return 0x0000;
+        }
+        
+        virtual void postWaiveInit(OptimizerInfo* inf){}
+        
+        virtual float getOptimLR(){return 0;}
+        
+        virtual void updateOptimLR(float val){}
+        
+        virtual float getL2Const(){return 0;}
+        
+        virtual void updateL2Const(float val){}
     };
     
 } // seann

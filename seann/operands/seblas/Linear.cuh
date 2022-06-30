@@ -38,6 +38,23 @@ namespace seann {
         void randFillNetParams() override;
         
         void zeroGrads() override;
+        
+        uint32 OPERAND_ID() override {
+            return 0x0a01;
+        }
+        
+        float getOptimLR() override;
+        
+        void updateOptimLR(float val) override;
+        
+        float getL2Const() override{
+            return weights->opt->L2;
+        }
+        
+        void updateL2Const(float val) override{
+            weights->opt->L2 = val;
+            biases->opt->L2 = val;
+        }
     };
     
 } // seann

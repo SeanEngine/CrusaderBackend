@@ -6,7 +6,7 @@
 
 namespace seann {
     void cuConv2D::initNetParams(OptimizerInfo *info, shape4 inShape) {
-        filter = new NetParam(info, filterShape);
+        filter = (new NetParam(info, filterShape))->setWeight();
         if (WITH_BIAS) bias = new NetParam(info, filterShape.n, 1);
         X = Parameter::declare(inShape); //input features
         shape4 outShape = {

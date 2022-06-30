@@ -9,7 +9,7 @@ namespace seann {
         INPUT_SIZE = inShape.size/inShape.n;
         X = Parameter::declare(inShape.n , 1, INPUT_SIZE, 1);
         Y = Parameter::create(inShape.n, 1, OUTPUT_SIZE, 1);
-        weights = new NetParam(info, OUTPUT_SIZE, INPUT_SIZE);
+        weights = (new NetParam(info, OUTPUT_SIZE, INPUT_SIZE))->setWeight();
         biases = new NetParam(info, OUTPUT_SIZE, 1);
     }
     
@@ -46,5 +46,14 @@ namespace seann {
     void Linear::zeroGrads() {
         weights->opt->zeroGrad();
         biases->opt->zeroGrad();
+    }
+    
+    float Linear::getOptimLR() {
+        return weights->opt->LEARNING_RATE;
+    }
+    
+    void Linear::updateOptimLR(float val) {
+        weights->opt->LEARNING_RATE = val;
+        biases->opt->LEARNING_RATE = val;
     }
 } // seann

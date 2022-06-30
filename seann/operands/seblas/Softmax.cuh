@@ -38,6 +38,10 @@ namespace seann {
         void randFillNetParams() override{}
         
         void zeroGrads() override{}
+        
+        uint32 OPERAND_ID() override {
+            return 0x0c02;
+        }
     };
 } // seann
 

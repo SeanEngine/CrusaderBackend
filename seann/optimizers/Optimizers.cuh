@@ -24,11 +24,12 @@ namespace seann {
     public:
         float LEARNING_RATE{};
         Parameter* A;
+        float L2 = 0.0001;
+        bool isWeight = false;
         
         explicit Optimizer(float LEARNING_RATE, Parameter* A)
                 : LEARNING_RATE(LEARNING_RATE), A(A){}
-        
-        
+                
         //apply the gradient to the parameters (weights, biases, etc)
         virtual void apply() = 0;
         

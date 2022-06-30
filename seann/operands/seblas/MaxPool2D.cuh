@@ -13,11 +13,12 @@ namespace seann {
         Tensor* record{};
         uint32 stepH;
         uint32 stepW;
-        explicit MaxPool2D(uint32 stepH, uint32 stepW){
+    
+        MaxPool2D(uint32 stepH, uint32 stepW){
             this->stepH = stepH;
             this->stepW = stepW;
         }
-        
+    
         void randFillNetParams() override{}
         
         string info() override;
@@ -39,6 +40,10 @@ namespace seann {
         }
         
         void zeroGrads() override{}
+        
+        uint32 OPERAND_ID() override {
+            return 0x0b03;
+        }
     };
     
 } // seamm

@@ -62,24 +62,24 @@ add_executable(Crusader main.cu
         seann/containers/NetParam.cuh
         seann/operands/OperandBase.cu
         seann/operands/OperandBase.cuh
-        seann/operands/dylan/Linear.cu
-        seann/operands/dylan/Linear.cuh
-        seann/operands/dylan/Conv2D.cu
-        seann/operands/dylan/Conv2D.cuh
-        seann/operands/dylan/BatchNorm.cu
-        seann/operands/dylan/BatchNorm.cuh
-        seann/operands/dylan/MaxPool2D.cu
-        seann/operands/dylan/MaxPool2D.cuh
-        seann/operands/dylan/ReLU.cu
-        seann/operands/dylan/ReLU.cuh
-        seann/operands/dylan/Softmax.cu
-        seann/operands/dylan/Softmax.cuh
+        seann/operands/seblas/Linear.cu
+        seann/operands/seblas/Linear.cuh
+        seann/operands/seblas/Conv2D.cu
+        seann/operands/seblas/Conv2D.cuh
+        seann/operands/seblas/BatchNorm.cu
+        seann/operands/seblas/BatchNorm.cuh
+        seann/operands/seblas/MaxPool2D.cu
+        seann/operands/seblas/MaxPool2D.cuh
+        seann/operands/seblas/ReLU.cu
+        seann/operands/seblas/ReLU.cuh
+        seann/operands/seblas/Softmax.cu
+        seann/operands/seblas/Softmax.cuh
         seio/data/Dataset.cu
         seio/data/Dataset.cuh
         seio/data/DataLoader.cu
         seio/data/DataLoader.cuh
         seann/seann.cuh
-        seann/containers/Block.cu seann/containers/Block.cuh seblas/operations/cuDropout.cu seblas/operations/cuDropout.cuh seann/operands/dylan/Dropout.cu seann/operands/dylan/Dropout.cuh seann/operands/cudnn/cuConv2D.cu seann/operands/cudnn/cuConv2D.cuh seio/data/DataTransform.cu seio/data/DataTransform.cuh seio/data/DataAugmentor.cu seio/data/DataAugmentor.cuh seio/data/Data.cu seio/data/Data.cuh)
+        seann/containers/Block.cu seann/containers/Block.cuh seblas/operations/cuDropout.cu seblas/operations/cuDropout.cuh seann/operands/seblas/Dropout.cu seann/operands/seblas/Dropout.cuh seann/operands/cudnn/cuConv2D.cu seann/operands/cudnn/cuConv2D.cuh seio/data/DataTransform.cu seio/data/DataTransform.cuh seio/data/DataAugmentor.cu seio/data/DataAugmentor.cuh seio/data/Data.cu seio/data/Data.cuh seann/operands/controlling/ShortcutEndpoint.cu seann/operands/controlling/ShortcutEndpoint.cuh)
 
 include_directories(${CUDNN_PATH}/include)
 link_directories(${CUDNN_PATH} ${CUDNN_PATH}/bin ${CUDNN_PATH}/lib/x64 ${CUDNN_PATH}/dec/dll_x64)

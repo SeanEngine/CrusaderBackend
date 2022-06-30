@@ -31,7 +31,7 @@ namespace seann {
         }
         
         void initNetParams(OptimizerInfo *info, shape4 inShape) override {
-            filter = new NetParam(info, filterShape);
+            filter = (new NetParam(info, filterShape))->setWeight();
             if (WITH_BIAS) bias = new NetParam(info, filterShape.n, 1);
             X = Parameter::declare(inShape); //input features
             shape4 outShape = {
@@ -60,6 +60,28 @@ namespace seann {
         void randFillNetParams() override;
         
         void zeroGrads() override;
+        
+        uint32 OPERAND_ID() override {
+            return 0x0a02;
+        }
+        
+        float getOptimLR() override {
+            return filter->opt->LEARNING_RATE;
+        }
+        
+        void updateOptimLR(float val) override {
+            filter->opt->LEARNING_RATE = val;
+            if (WITH_BIAS) bias->opt->LEARNING_RATE = val;
+        }
+        
+        float getL2Const() override {
+            return filter->opt->L2;
+        }
+        
+        void updateL2Const(float val) override {
+            filter->opt->L2 = val;
+            if (WITH_BIAS) bias->opt->L2 = val;
+        }
     };
     
 } // seann

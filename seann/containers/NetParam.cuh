@@ -31,6 +31,19 @@ namespace seann {
             opt = info->create(A);
         }
         
+        void setWeightDecay(float weightDecay) const {
+            opt->L2 = weightDecay;
+        }
+        
+        void update() const {
+            opt->apply();
+        }
+        
+        NetParam* setWeight() {
+            opt->isWeight = true;
+            return this;
+        }
+        
         Tensor* data() const{
             return A->A;
         }
