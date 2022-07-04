@@ -99,6 +99,11 @@ namespace seann {
         virtual float getL2Const(){return 0;}
         
         virtual void updateL2Const(float val){}
+        
+        virtual void zeroGradY() const{
+            cudaMemset(Y->dA->elements, 0, Y->dA->dims.size * sizeof(float));
+            assertCuda(__FILE__, __LINE__);
+        }
     };
     
 } // seann

@@ -54,7 +54,7 @@ namespace seblas {
     __global__ void reluDGradFast(Tensor* Z, Tensor* dY, Tensor* dZ){
         uint32 idx = threadIdx.x + blockIdx.x * blockDim.x;
         if (idx < Z->dims.size) {
-            dZ->elements[idx] = (Z->elements[idx] > 0.0f) ? dY->elements[idx] : 0.0f;
+            dZ->elements[idx] += (Z->elements[idx] > 0.0f) ? dY->elements[idx] : 0.0f;
         }
     }
     
@@ -62,14 +62,16 @@ namespace seblas {
         uint32 idx = (threadIdx.x + blockIdx.x * blockDim.x) * 4;
         float regisZ[4];
         float regisDY[4];
+        float regisDZ[4];
         if (idx < Z->dims.size) {
             toFloat4R(regisZ[0]) = toFloat4R(Z->elements[idx]);
             toFloat4R(regisDY[0]) = toFloat4R(dY->elements[idx]);
-            regisDY[0] = regisZ[0] > 0.0f ? regisDY[0] : 0.0f;
-            regisDY[1] = regisZ[1] > 0.0f ? regisDY[1] : 0.0f;
-            regisDY[2] = regisZ[2] > 0.0f ? regisDY[2] : 0.0f;
-            regisDY[3] = regisZ[3] > 0.0f ? regisDY[3] : 0.0f;
-            toFloat4R(dZ->elements[idx]) = toFloat4R(regisDY[0]);
+            toFloat4R(regisDZ[0]) = toFloat4R(dZ->elements[idx]);
+            regisDZ[0] += regisZ[0] > 0.0f ? regisDY[0] : 0.0f;
+            regisDZ[1] += regisZ[1] > 0.0f ? regisDY[1] : 0.0f;
+            regisDZ[2] += regisZ[2] > 0.0f ? regisDY[2] : 0.0f;
+            regisDZ[3] += regisZ[3] > 0.0f ? regisDY[3] : 0.0f;
+            toFloat4R(dZ->elements[idx]) = toFloat4R(regisDZ[0]);
         }
     }
     

@@ -59,6 +59,14 @@ namespace seann {
             else
                 return 0xf001;
         }
+        
+        void zeroGradY() const override{
+            cudaMemset(Y->A->elements, 0, Y->A->dims.size * sizeof(float));
+            assertCuda(__FILE__, __LINE__);
+            for (uint32 i = 0; i < operandCount; i++){
+                branchOperands[i]->zeroGradY();
+            }
+        }
     };
 } // seann
 

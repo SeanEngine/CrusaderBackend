@@ -10,10 +10,10 @@ namespace seann {
     }
     
     void MaxPool2D::forward() {
-        maxPool(X->A, Y->A, record);
+        maxPool(X->A, Y->A, record, strideH, strideW, rangeH, rangeW);
     }
     
     void MaxPool2D::xGrads() {
-        maxPoolBack(X->dA, Y->dA, record);
+        maxPoolBack(X->dA, Y->dA, record, strideH, strideW, rangeH, rangeW);
     }
 } // seamm

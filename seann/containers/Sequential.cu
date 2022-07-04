@@ -78,6 +78,7 @@ namespace seann {
         for (int i = (int) OPERAND_COUNT - 1; i >= 0; i--) {
             operands[i]->xGrads();
             operands[i]->paramGrads();
+            operands[i]->zeroGradY();
         }
         return netX->dA;
     }
@@ -144,7 +145,7 @@ namespace seann {
                     cout << lossVal << ",";
                 }
             }
-            
+            /*
             if (epochID == 40) {
                 for (int i = 0; i < OPERAND_COUNT; i++){
                     operands[i]->updateOptimLR(operands[i]->getOptimLR() * 0.1f);
@@ -158,6 +159,7 @@ namespace seann {
                     operands[i]->updateL2Const(operands[i]->getL2Const() * 0.1f);
                 }
             }
+             */
         }
     }
 }

@@ -476,7 +476,7 @@ namespace seblas{
                     //remapping is needed since the original output matrix would be ( OC, OH * OW * ON )
                     uint32 on = (blockN + threadIdx.x * REGIS_N + rn) / (OH * OW);
                     C->elements[on * OC * OH * OW + (blockM + threadIdx.y * REGIS_M + rm) * (OH * OW)
-                                + (blockN + threadIdx.x * REGIS_N + rn)%(OH * OW)] = regisC[rm][rn];
+                                + (blockN + threadIdx.x * REGIS_N + rn)%(OH * OW)] += regisC[rm][rn];
                 }
             }
         }

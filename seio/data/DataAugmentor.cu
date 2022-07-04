@@ -3,6 +3,7 @@
 //
 
 #include "DataAugmentor.cuh"
+#include "../../seblas/assist/Inspections.cuh"
 
 namespace seio {
     
@@ -44,7 +45,8 @@ namespace seio {
                     for (int w = 0; w < dataShape.w; w++){
                         float val = h + hOffset > 0 && h + hOffset < dataShape.h &&
                                     w + wOffset > 0 && w + wOffset < dataShape.w ?
-                                    ptrSrc[(h + hOffset) * src->X->dims.w + (w + wOffset)] : 0;
+                                    ptrSrc[n * dataShape.size + c * dataShape.h * dataShape.w +
+                                            (h + hOffset) * src->X->dims.w + (w + wOffset)] : 0;
                         ptrDst[n * dataShape.size + c * dataShape.h * dataShape.w +
                             h * dataShape.w + w] = val;
                     }

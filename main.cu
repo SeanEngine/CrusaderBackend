@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
             new cuConv2D(cudnn,shape4(16, 3, 3, 3), 1, 1, 1, 1, false),
             new BatchNorm(),
             new ReLU(),
-            
+
             new ShortcutEndpoint(false, 0x01, {}),
             new cuConv2D(cudnn,shape4(16, 16, 3, 3), 1, 1, 1, 1, false),
             new BatchNorm(),
@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
             new BatchNorm(),
             new ShortcutEndpoint(true, 0x05, {}),
             new ReLU(),
-            
+
             new ShortcutEndpoint(false, 0x06, {}),
             new cuConv2D(cudnn,shape4(16, 16, 3, 3), 1, 1, 1, 1, false),
             new BatchNorm(),
@@ -107,9 +107,9 @@ int main(int argc, char** argv) {
             new ReLU(),
             new cuConv2D(cudnn,shape4(32, 16, 3, 3), 2, 2, 1, 1, false),
             new BatchNorm(),
-            new ShortcutEndpoint(true, 0x09, {new Conv2D(shape4(32, 16, 1, 1), 2, 2, 0, 0, false),}),
+            new ShortcutEndpoint(true, 0x09, {new cuConv2D(cudnn,shape4(32, 16, 1, 1), 2, 2, 0, 0, false),}),
             new ReLU(),
-            
+
             new ShortcutEndpoint(false, 0x10, {}),
             new cuConv2D(cudnn,shape4(32, 32, 3, 3), 1, 1, 1, 1, false),
             new BatchNorm(),
@@ -181,16 +181,16 @@ int main(int argc, char** argv) {
             new BatchNorm(),
             new ShortcutEndpoint(true, 0x17, {}),
             new ReLU(),
-            
+
             new ShortcutEndpoint(false, 0x18, {}),
             new cuConv2D(cudnn,shape4(32, 32, 3, 3), 1, 1, 1, 1, false),
             new BatchNorm(),
             new ReLU(),
             new cuConv2D(cudnn,shape4(64, 32, 3, 3), 2, 2, 1, 1, false),
             new BatchNorm(),
-            new ShortcutEndpoint(true, 0x18, {new Conv2D(shape4(64, 32, 1, 1), 2, 2, 0, 0, false),}),
+            new ShortcutEndpoint(true, 0x18, {new cuConv2D(cudnn, shape4(64, 32, 1, 1), 2, 2, 0, 0, false),}),
             new ReLU(),
-            
+
             new ShortcutEndpoint(false, 0x19, {}),
             new cuConv2D(cudnn,shape4(64, 64, 3, 3), 1, 1, 1, 1, false),
             new BatchNorm(),
@@ -253,8 +253,8 @@ int main(int argc, char** argv) {
             new BatchNorm(),
             new ShortcutEndpoint(true, 0x25, {}),
             new ReLU(),
-            
-            
+
+
             new ShortcutEndpoint(false, 0x26, {}),
             new cuConv2D(cudnn,shape4(64, 64, 3, 3), 1, 1, 1, 1, false),
             new BatchNorm(),
@@ -304,7 +304,7 @@ int main(int argc, char** argv) {
     
     dataset->setAugmentSteps({
         new RandFlipW(dataset->MINI_BATCH_SIZE, dataset->dataShape, dataset->labelShape),
-        //new RandCorp(dataset->MINI_BATCH_SIZE, dataset->dataShape, dataset->labelShape,4,4)
+        new RandCorp(dataset->MINI_BATCH_SIZE, dataset->dataShape, dataset->labelShape,4,4)
     });
 
     model->train(dataset, true, 1);

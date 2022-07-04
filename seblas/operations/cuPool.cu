@@ -5,7 +5,7 @@
 #include "cuPool.cuh"
 
 namespace seblas {
-    __global__ void maxPoolD(Tensor* X, Tensor* Y, Tensor* record) {
+    __global__ void maxPoolD(Tensor* X, Tensor* Y, Tensor* record, uint32 strideH, uint32 strideW, uint32 rangeH, uint32 rangeW) {
         uint32 pid = blockIdx.x * blockDim.x + threadIdx.x;
         const uint32 nOffset = (Y->dims.c * Y->dims.h * Y->dims.w);
         const uint32 nDim = pid / nOffset;
@@ -15,20 +15,17 @@ namespace seblas {
         const uint32 hDim = ((pid % nOffset) % cOffset) / hOffset;
         const uint32 wDim = ((pid % nOffset) % cOffset) % hOffset;
         
-        const uint32 xStep = X->dims.w / Y->dims.w;
-        const uint32 yStep = X->dims.h / Y->dims.h;
-        
         if(pid > Y->dims.size) return;
         
         float max = -1e15;
         uint32 indX = 0;
         uint32 indY = 0;
         #pragma unroll
-        for(uint32 i = 0; i < yStep; i++){
+        for(uint32 i = 0; i < rangeH; i++){
             #pragma unroll
-            for(uint32 j = 0; j < xStep; j++){
-                float comp = X->elements[(nDim * nOffset + cDim * cOffset) * xStep * yStep
-                                         + (hDim * yStep + i) * X->dims.w + wDim * xStep + j];
+            for(uint32 j = 0; j < rangeW; j++){
+                float comp = X->elements[(nDim * nOffset + cDim * cOffset) * strideH * strideW
+                                         + (hDim * strideH + i) * X->dims.w + wDim * strideW + j];
                 if (comp > max){
                     indX = j;
                     indY = i;
@@ -37,12 +34,12 @@ namespace seblas {
             }
         }
         
-        record->elements[(nDim * nOffset + cDim * cOffset) * xStep * yStep
-                         + (hDim * yStep + indY) * X->dims.w + wDim * xStep + indX] = 1;
+        record->elements[(nDim * nOffset + cDim * cOffset) * rangeH * rangeW
+                         + (hDim * rangeH + indY) * X->dims.w + wDim * rangeW + indX] = 1;
         Y->elements[pid] = max;
     }
     
-    __global__ void maxPoolBackD(Tensor* X, Tensor* Y, Tensor* record){
+    __global__ void maxPoolBackD(Tensor* X, Tensor* Y, Tensor* record, uint32 strideH, uint32 strideW, uint32 rangeH, uint32 rangeW){
         uint32 pid = blockIdx.x * blockDim.x + threadIdx.x;
         const uint32 nOffset = (Y->dims.c * Y->dims.h * Y->dims.w);
         const uint32 nDim = pid / nOffset;
@@ -52,18 +49,15 @@ namespace seblas {
         const uint32 hDim = ((pid % nOffset) % cOffset) / hOffset;
         const uint32 wDim = ((pid % nOffset) % cOffset) % hOffset;
         
-        const uint32 xStep = X->dims.w / Y->dims.w;
-        const uint32 yStep = X->dims.h / Y->dims.h;
-        
         float max = -1e15;
         uint32 indX = 0;
         uint32 indY = 0;
         #pragma unroll
-        for(uint32 i = 0; i < yStep; i++){
+        for(uint32 i = 0; i < rangeH; i++){
             #pragma unroll
-            for(uint32 j = 0; j < xStep; j++){
-                float comp = record->elements[(nDim * nOffset + cDim * cOffset) * xStep * yStep
-                                              + (hDim * yStep + i) * X->dims.w + wDim * xStep + j];
+            for(uint32 j = 0; j < rangeW; j++){
+                float comp = record->elements[(nDim * nOffset + cDim * cOffset) * rangeH * rangeW
+                                              + (hDim * rangeH + i) * X->dims.w + wDim * rangeW + j];
                 if (comp > max){
                     indX = j;
                     indY = i;
@@ -72,24 +66,26 @@ namespace seblas {
             }
         }
         float grad = Y->elements[pid];
-        X->elements[(nDim * nOffset + cDim * cOffset) * xStep * yStep
-                    + (hDim * yStep + indY) * X->dims.w + wDim * xStep + indX] = grad;
-        record->elements[(nDim * nOffset + cDim * cOffset) * xStep * yStep
-                         + (hDim * yStep + indY) * X->dims.w + wDim * xStep + indX] = 0;
+        X->elements[(nDim * nOffset + cDim * cOffset) * strideH * strideW
+                    + (hDim * strideH + indY) * X->dims.w + wDim * strideW + indX] += grad;
+        record->elements[(nDim * nOffset + cDim * cOffset) * strideH * strideW
+                         + (hDim * strideH + indY) * X->dims.w + wDim * strideW + indX] = 0;
     }
     
-    void maxPool(Tensor* X, Tensor* Y, Tensor* record){
+    void maxPool(Tensor* X, Tensor* Y, Tensor* record, uint32 strideH, uint32 strideW, uint32 rangeH, uint32 rangeW){
+        assert((X->dims.h - (rangeH - strideH)) / strideH == Y->dims.h);
+        assert((X->dims.w - (rangeW - strideW)) / strideW == Y->dims.w);
         uint32 block = CUDA_BLOCK_SIZE.x * CUDA_BLOCK_SIZE.y;
         uint32 grid = (Y->dims.size + block - 1)/block;
-        maxPoolD<<<grid, block>>>(X, Y, record);
+        maxPoolD<<<grid, block>>>(X, Y, record, strideH, strideW, rangeH, rangeW);
         cudaDeviceSynchronize();
         assertCuda(__FILE__, __LINE__);
     }
     
-    void maxPoolBack(Tensor* X, Tensor* Y, Tensor* record){
+    void maxPoolBack(Tensor* X, Tensor* Y, Tensor* record, uint32 strideH, uint32 strideW, uint32 rangeH, uint32 rangeW){
         uint32 block = CUDA_BLOCK_SIZE.x * CUDA_BLOCK_SIZE.y;
         uint32 grid = (Y->dims.size + block - 1)/block;
-        maxPoolBackD<<<grid, block>>>(X, Y, record);
+        maxPoolBackD<<<grid, block>>>(X, Y, record, strideH, strideW, rangeH, rangeW);
         cudaDeviceSynchronize();
         assertCuda(__FILE__, __LINE__);
     }
