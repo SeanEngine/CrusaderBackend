@@ -12,5 +12,7 @@ namespace seann {
     // ∂C/∂Z = ∂C/∂a * ∂a/∂Z = ∂C/∂a * σ'(Z)
     void ReLU::xGrads() {
         reluGradFast(X->A, Y->dA, X->dA);
+        *X->dA + X->dAReserve;
+        X->dAReserve->constFill(0);
     }
 } // seann

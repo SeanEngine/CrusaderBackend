@@ -15,5 +15,7 @@ namespace seann {
     
     void MaxPool2D::xGrads() {
         maxPoolBack(X->dA, Y->dA, record, strideH, strideW, rangeH, rangeW);
+        *X->dA + X->dAReserve;
+        X->dAReserve->constFill(0);
     }
 } // seamm

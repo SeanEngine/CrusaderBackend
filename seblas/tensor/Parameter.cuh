@@ -12,12 +12,14 @@ namespace seblas {
     public:
         Tensor* A;
         Tensor* dA;
+        Tensor* dAReserve;
         
         static Parameter* create(shape4 dims){
             Parameter* p;
             cudaMallocHost(&p, sizeof(Parameter));
             p->A = Tensor::declare(dims)->instantiate();
             p->dA = Tensor::declare(dims)->instantiate();
+            p->dAReserve = Tensor::declare(dims)->instantiate();
             return p;
         };
         
@@ -31,6 +33,7 @@ namespace seblas {
             cudaMallocHost(&p, sizeof(Parameter));
             p->A = src;
             p->dA = Tensor::create(src->dims);
+            p->dAReserve = Tensor::create(src->dims);
             return p;
         };
         
@@ -39,6 +42,7 @@ namespace seblas {
             cudaMallocHost(&p, sizeof(Parameter));
             p->A = Tensor::declare(dims);
             p->dA = Tensor::declare(dims);
+            p->dAReserve = Tensor::declare(dims);
             return p;
         }
     
@@ -51,6 +55,7 @@ namespace seblas {
         Parameter* instantiate(){
             A->instantiate();
             dA->instantiate();
+            dAReserve->instantiate();
             return this;
         }
         
@@ -60,6 +65,7 @@ namespace seblas {
             assert(src->A->dims.size == this->A->dims.size);
             this->A->attach(src->A);
             this->dA->attach(src->dA);
+            this->dAReserve->attach(src->dAReserve);
             return this;
         }
     };

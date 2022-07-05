@@ -49,7 +49,7 @@ namespace seblas {
     __global__ void dropoutGradD(Tensor* dX, Tensor* dY, Tensor* mask, float p){
         uint32 tid = threadIdx.x + blockIdx.x * blockDim.x;
         if(tid >= dX->dims.size) return;
-        dX->elements[tid] += mask->elements[tid] * dY->elements[tid] * p;
+        dX->elements[tid] = mask->elements[tid] * dY->elements[tid] * p;
     }
     
     __global__ void dropoutGrad4D(Tensor* dX, Tensor* dY, Tensor* mask, float p){
@@ -61,10 +61,10 @@ namespace seblas {
         toFloat4R(regisDY[0]) = toFloat4R(dY->elements[tid]);
         toFloat4R(regisDX[0]) = toFloat4R(dX->elements[tid]);
         toFloat4R(regisM[0]) = toFloat4R(mask->elements[tid]);
-        regisDX[0] += regisM[0] * regisDY[0] * p;
-        regisDX[1] += regisM[1] * regisDY[1] * p;
-        regisDX[2] += regisM[2] * regisDY[2] * p;
-        regisDX[3] += regisM[3] * regisDY[3] * p;
+        regisDX[0] = regisM[0] * regisDY[0] * p;
+        regisDX[1] = regisM[1] * regisDY[1] * p;
+        regisDX[2] = regisM[2] * regisDY[2] * p;
+        regisDX[3] = regisM[3] * regisDY[3] * p;
         toFloat4R(dX->elements[tid]) = toFloat4R(regisDX[0]);
     }
     

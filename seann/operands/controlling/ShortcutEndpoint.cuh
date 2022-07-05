@@ -16,7 +16,6 @@ namespace seann {
         OperandBase** branchOperands{};
         uint32 operandCount = 0;
         uint32 uuid;
-        Parameter* srcBuffer;
         ShortcutEndpoint(bool isContainer, uint32 uuid,
                             std::initializer_list<OperandBase*> operands){
             this->isContainer = isContainer;
@@ -58,14 +57,6 @@ namespace seann {
                 return 0xf002;
             else
                 return 0xf001;
-        }
-        
-        void zeroGradY() const override{
-            cudaMemset(Y->A->elements, 0, Y->A->dims.size * sizeof(float));
-            assertCuda(__FILE__, __LINE__);
-            for (uint32 i = 0; i < operandCount; i++){
-                branchOperands[i]->zeroGradY();
-            }
         }
     };
 } // seann

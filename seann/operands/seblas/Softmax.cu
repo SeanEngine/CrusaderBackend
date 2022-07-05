@@ -13,5 +13,7 @@ namespace seann {
         //Y->grad = Y->a - correct
         //this is controlled by loss function
         Y->dA->copyToD2D(X->dA);
+        *X->dA + X->dAReserve;
+        X->dAReserve->constFill(0);
     }
 } // seann

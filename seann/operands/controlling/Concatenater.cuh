@@ -12,6 +12,7 @@ namespace seann {
     public:
         uint32 paramCount;
         Parameter** params;
+        
     };
 } // seann
 

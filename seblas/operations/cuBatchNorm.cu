@@ -119,7 +119,7 @@ namespace seblas{
             float dy = dY->elements[depth * (dY->dims.size/dY->dims.n) + idx];
             float gammaVal = gamma->elements[idx];
             float dXHat = dy * gammaVal;
-            dX->elements[depth * (dX->dims.size/dX->dims.n) + idx] += dXHat / sqrt(varVal + 1e-8f)
+            dX->elements[depth * (dX->dims.size/dX->dims.n) + idx] = dXHat / sqrt(varVal + 1e-8f)
                       + dVar * (xVal - meanVal) * 2.0f / (float)dY->dims.n + dMean / (float)dY->dims.n;
         }
     }

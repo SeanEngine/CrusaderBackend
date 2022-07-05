@@ -67,7 +67,7 @@ namespace seblas {
         }
         float grad = Y->elements[pid];
         X->elements[(nDim * nOffset + cDim * cOffset) * strideH * strideW
-                    + (hDim * strideH + indY) * X->dims.w + wDim * strideW + indX] += grad;
+                    + (hDim * strideH + indY) * X->dims.w + wDim * strideW + indX] = grad;
         record->elements[(nDim * nOffset + cDim * cOffset) * strideH * strideW
                          + (hDim * strideH + indY) * X->dims.w + wDim * strideW + indX] = 0;
     }

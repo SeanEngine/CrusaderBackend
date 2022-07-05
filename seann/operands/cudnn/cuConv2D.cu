@@ -44,6 +44,8 @@ namespace seann {
                 nullptr, 0,
                 &beta,
                 X->dA->cudnnDesc, X->dA->elements);
+        *X->dA + X->dAReserve;
+        X->dAReserve->constFill(0);
     }
     
     void cuConv2D::paramGrads() {

@@ -35,6 +35,8 @@ namespace seann {
     void Linear::xGrads() {
         // ∂x = w^T * ∂z
         linearXGrad(Y->dA, weights->data(), X->dA);
+        *X->dA + X->dAReserve;
+        X->dAReserve->constFill(0);
     }
     
     void Linear::randFillNetParams() {

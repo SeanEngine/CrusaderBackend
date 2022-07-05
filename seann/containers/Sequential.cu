@@ -78,7 +78,6 @@ namespace seann {
         for (int i = (int) OPERAND_COUNT - 1; i >= 0; i--) {
             operands[i]->xGrads();
             operands[i]->paramGrads();
-            operands[i]->zeroGradY();
         }
         return netX->dA;
     }
@@ -119,6 +118,7 @@ namespace seann {
                 
                 float lossVal = lossFW(netY, data->dataBatch[batchID % 2][sampleID]->label, lossBuf);
                 batchLoss += lossVal;
+                //cout<<lossVal/64<<",";
                 learn();
             }
             

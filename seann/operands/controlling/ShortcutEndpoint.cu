@@ -9,7 +9,6 @@ namespace seann {
         
         X = Parameter::declare(inShape);
         Y = Parameter::create(inShape);
-        if(!isContainer){ srcBuffer = Parameter::create(inShape); }
     }
     
     void ShortcutEndpoint::postWaiveInit(OptimizerInfo* inf) {
@@ -32,7 +31,8 @@ namespace seann {
                 assert(branchOperands[operandCount - 1]->Y->A->dims == Y->A->dims);
     
                 branchOperands[0]->bindPrev(other);
-                branchOperands[0]->bindInput(other->srcBuffer);
+                branchOperands[0]->bindInput(other->Y);
+                branchOperands[0]->X->dA = other->X->dAReserve;
     
                 for (auto i = 1; i < operandCount; i++) {
                     branchOperands[i]->bindPrev(branchOperands[i - 1]);
@@ -71,10 +71,6 @@ namespace seann {
                 //Identity shortcut
                 *Y->A + other->Y->A;
             }
-        }else{
-            cudaMemcpy(srcBuffer->A->elements, X->A->elements,
-                       X->A->dims.size * sizeof(float), cudaMemcpyDeviceToDevice);
-            assertCuda(__FILE__, __LINE__);
         }
     }
     
@@ -93,12 +89,12 @@ namespace seann {
                 }
             }else{
                 //Identity shortcut
-                cudaMemcpy(other->srcBuffer->dA->elements, Y->dA->elements,
+                cudaMemcpy(other->X->dAReserve->elements, Y->dA->elements,
                            Y->A->dims.size * sizeof(float), cudaMemcpyDeviceToDevice);
                 assertCuda(__FILE__, __LINE__);
             }
         }else{
-            *X->dA + srcBuffer->dA;
+            *X->dA + X->dAReserve;
         }
     }
     

@@ -623,7 +623,7 @@ namespace seblas {
                 for (int rn = 0; rn < REGIS_N; rn++) {
                     if ((blockM + threadIdx.y * REGIS_M + rm < M && blockN + threadIdx.x * REGIS_N + rn < N)) {
                         dX->elements[blockM + threadIdx.y * REGIS_M + rm
-                                    + (blockN + threadIdx.x * REGIS_N + rn) * nShift] += regisDX[rm][rn];
+                                    + (blockN + threadIdx.x * REGIS_N + rn) * nShift] = regisDX[rm][rn];
                     }
                 }
             }
@@ -846,7 +846,7 @@ namespace seblas {
                 for (int rn = 0; rn < REGIS_N; rn++) {
                     if ((blockM + threadIdx.y * REGIS_M + rm < M && blockN + threadIdx.x * REGIS_N + rn < N)) {
                         dX->elements[blockM + threadIdx.y * REGIS_M + rm
-                                     + (blockN + threadIdx.x * REGIS_N + rn) * nShift] += regisDX[rm][rn];
+                                     + (blockN + threadIdx.x * REGIS_N + rn) * nShift] = regisDX[rm][rn];
                     }
                 }
             }

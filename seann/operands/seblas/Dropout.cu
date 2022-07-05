@@ -17,6 +17,8 @@ namespace seann {
     
     void Dropout::xGrads() {
         dropoutGrad(X->dA, Y->dA, mask, p);
+        *X->dA + X->dAReserve;
+        X->dAReserve->constFill(0);
     }
     
     string Dropout::info() {
