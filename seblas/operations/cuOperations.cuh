@@ -16,5 +16,6 @@
 #include "cuBatchNorm.cuh"
 #include "cuActivation.cuh"
 #include "cuDropout.cuh"
+#include "cuConcat.cuh"
 
 #endif //CRUSADER_CUOPERATIONS_CUH

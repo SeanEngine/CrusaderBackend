@@ -32,7 +32,7 @@ namespace seann {
     
                 branchOperands[0]->bindPrev(other);
                 branchOperands[0]->bindInput(other->Y);
-                branchOperands[0]->X->dA = other->X->dAReserve;
+                branchOperands[0]->X->dA = other->Y->dAReserve;
     
                 for (auto i = 1; i < operandCount; i++) {
                     branchOperands[i]->bindPrev(branchOperands[i - 1]);
@@ -75,9 +75,6 @@ namespace seann {
     }
     
     void ShortcutEndpoint::xGrads() {
-        cudaMemcpy(X->dA->elements, Y->dA->elements,
-                   X->A->dims.size * sizeof(float), cudaMemcpyDeviceToDevice);
-        assertCuda(__FILE__, __LINE__);
         if(isContainer) {
             if(operandCount > 0) {
                 cudaMemcpy(branchOperands[operandCount-1]->Y->dA->elements, Y->dA->elements,
@@ -89,13 +86,17 @@ namespace seann {
                 }
             }else{
                 //Identity shortcut
-                cudaMemcpy(other->X->dAReserve->elements, Y->dA->elements,
+                cudaMemcpy(other->Y->dAReserve->elements, Y->dA->elements,
                            Y->A->dims.size * sizeof(float), cudaMemcpyDeviceToDevice);
                 assertCuda(__FILE__, __LINE__);
             }
         }else{
-            *X->dA + X->dAReserve;
+            *Y->dA + Y->dAReserve;
+            Y->dAReserve->constFill(0);
         }
+        cudaMemcpy(X->dA->elements, Y->dA->elements,
+                   X->A->dims.size * sizeof(float), cudaMemcpyDeviceToDevice);
+        assertCuda(__FILE__, __LINE__);
     }
     
     void ShortcutEndpoint::paramGrads() {

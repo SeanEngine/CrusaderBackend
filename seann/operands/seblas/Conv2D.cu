@@ -16,9 +16,9 @@ namespace seann {
     }
     
     void Conv2D::xGrads() {
+        *Y->dA + Y->dAReserve;
         convDerive(filter->data(), Y->dA, X->dA, (int)strideH, (int)strideW, (int)padH, (int)padW);
-        *X->dA + X->dAReserve;
-        X->dAReserve->constFill(0);
+        Y->dAReserve->constFill(0);
     }
     
     void Conv2D::paramGrads() {

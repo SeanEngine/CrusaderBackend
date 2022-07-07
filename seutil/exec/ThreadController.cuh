@@ -12,7 +12,7 @@
 using namespace std;
 namespace seutil{
 
-    //To use this, the first params of your function need to be the tid
+    //To use this, the first Xs of your function need to be the tid
     template<const int x, const int y, typename ...Args, typename ...Args0>
     void _alloc(void(*func)(Args...), Args0... args){
         vector<thread> threads;

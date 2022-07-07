@@ -145,21 +145,20 @@ namespace seann {
                     cout << lossVal << ",";
                 }
             }
-            /*
-            if (epochID == 40) {
+            
+            if (epochID == 65) {
                 for (int i = 0; i < OPERAND_COUNT; i++){
                     operands[i]->updateOptimLR(operands[i]->getOptimLR() * 0.1f);
                     operands[i]->updateL2Const(operands[i]->getL2Const() * 0.1f);
                 }
             }
             
-            if (epochID > 40 && epochID % 10 == 0) {
+            if (epochID > 65 && epochID % 25 == 0) {
                 for (int i = 0; i < OPERAND_COUNT; i++) {
                     operands[i]->updateOptimLR(operands[i]->getOptimLR() * 0.1f);
                     operands[i]->updateL2Const(operands[i]->getL2Const() * 0.1f);
                 }
             }
-             */
         }
     }
 }

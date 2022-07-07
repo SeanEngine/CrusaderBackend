@@ -273,7 +273,7 @@ int main(int argc, char** argv) {
             new ShortcutEndpoint(true, 0x27, {}),
             new ReLU(),
             
-            new Linear(256),
+            new Linear(1024),
             new ReLU(),
             new Linear(10),
             new Softmax()

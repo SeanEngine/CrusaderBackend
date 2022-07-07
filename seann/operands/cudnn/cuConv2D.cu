@@ -34,6 +34,7 @@ namespace seann {
     
     void cuConv2D::xGrads() {
         float alpha = 1.0f, beta = 0.0f;
+        *Y->dA + Y->dAReserve;
         cudnnConvolutionBackwardData(
                 cudnn,
                 &alpha,
@@ -44,8 +45,7 @@ namespace seann {
                 nullptr, 0,
                 &beta,
                 X->dA->cudnnDesc, X->dA->elements);
-        *X->dA + X->dAReserve;
-        X->dAReserve->constFill(0);
+        Y->dAReserve->constFill(0);
     }
     
     void cuConv2D::paramGrads() {
