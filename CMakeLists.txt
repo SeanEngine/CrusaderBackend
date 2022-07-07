@@ -42,6 +42,10 @@ add_executable(Crusader main.cu
         seblas/operations/cuActivation.cuh
         seblas/operations/cuBatchNorm.cu
         seblas/operations/cuBatchNorm.cuh
+        seblas/operations/cuDropout.cu
+        seblas/operations/cuDropout.cuh
+        seblas/operations/cuConcat.cu
+        seblas/operations/cuConcat.cuh
 
         seutil/exec/ThreadController.cu
         seutil/exec/ThreadController.cuh
@@ -50,6 +54,16 @@ add_executable(Crusader main.cu
         seio/logging/Color.cuh
         seio/logging/LogUtils.cu
         seio/logging/LogUtils.cuh
+        seio/data/Dataset.cu
+        seio/data/Dataset.cuh
+        seio/data/DataLoader.cu
+        seio/data/DataLoader.cuh
+        seio/data/DataTransform.cu
+        seio/data/DataTransform.cuh
+        seio/data/DataAugmentor.cu
+        seio/data/DataAugmentor.cuh
+        seio/data/Data.cu
+        seio/data/Data.cuh
 
         validation/UnitTestTools.cu
         validation/UnitTestTools.cuh
@@ -74,12 +88,18 @@ add_executable(Crusader main.cu
         seann/operands/seblas/ReLU.cuh
         seann/operands/seblas/Softmax.cu
         seann/operands/seblas/Softmax.cuh
-        seio/data/Dataset.cu
-        seio/data/Dataset.cuh
-        seio/data/DataLoader.cu
-        seio/data/DataLoader.cuh
+        seann/operands/seblas/Dropout.cu
+        seann/operands/seblas/Dropout.cuh
+        seann/operands/cudnn/cuConv2D.cu
+        seann/operands/cudnn/cuConv2D.cuh
+        seann/operands/controlling/ShortcutEndpoint.cu
+        seann/operands/controlling/ShortcutEndpoint.cuh
+        seann/operands/prefabs/DenseBlock.cu
+        seann/operands/prefabs/DenseBlock.cuh
+        seann/operands/controlling/ChannelConcatenater.cu
+        seann/operands/controlling/ChannelConcatenater.cuh
         seann/seann.cuh
-        seblas/operations/cuDropout.cu seblas/operations/cuDropout.cuh seann/operands/seblas/Dropout.cu seann/operands/seblas/Dropout.cuh seann/operands/cudnn/cuConv2D.cu seann/operands/cudnn/cuConv2D.cuh seio/data/DataTransform.cu seio/data/DataTransform.cuh seio/data/DataAugmentor.cu seio/data/DataAugmentor.cuh seio/data/Data.cu seio/data/Data.cuh seann/operands/controlling/ShortcutEndpoint.cu seann/operands/controlling/ShortcutEndpoint.cuh seann/operands/prefabs/DenseBlock.cu seann/operands/prefabs/DenseBlock.cuh seann/operands/controlling/ChannelConcatenater.cu seann/operands/controlling/ChannelConcatenater.cuh seblas/operations/cuConcat.cu seblas/operations/cuConcat.cuh)
+        )
 
 include_directories(${CUDNN_PATH}/include)
 link_directories(${CUDNN_PATH} ${CUDNN_PATH}/bin ${CUDNN_PATH}/lib/x64 ${CUDNN_PATH}/dec/dll_x64)
