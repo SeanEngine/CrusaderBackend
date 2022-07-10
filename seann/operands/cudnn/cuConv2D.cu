@@ -9,6 +9,7 @@ namespace seann {
         filter = (new NetParam(info, filterShape))->setWeight();
         if (WITH_BIAS) bias = new NetParam(info, filterShape.n, 1);
         X = Parameter::declare(inShape); //input features
+        assert(inShape.c == filterShape.c);
         shape4 outShape = {
                 X->A->dims.n,
                 filterShape.n,

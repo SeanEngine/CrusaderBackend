@@ -29,7 +29,7 @@ namespace seann {
             this->cudnn = cudnn;
             
             //BN-ReLU-Conv-Concat
-            this->operandCount = 7 * l;
+            this->operandCount = 7 * l + 1;
             cudaMallocHost(&operands, sizeof(OperandBase*) * operandCount);
         }
         
@@ -37,46 +37,54 @@ namespace seann {
             X = Parameter::declare(inShape);
             uint32 k0 = inShape.c;
             uint32 n = inShape.n;
+            Y = Parameter::create(n, k0 + k * l, inShape.h, inShape.w);
 
             //initialize block operands
             for(uint32 comp = 0; comp < l; comp++){
-                
-                operands[comp*7] = new BatchNorm();
-                operands[comp*7 + 1] = new ReLU();
+                if(comp==0) {
+                    operands[comp * 7] = new ChannelConcatenater(1, k0);
+                }else{
+                    operands[comp * 7] = new ChannelConcatenater(2, k0 + k * (comp), {7});
+                }
+                operands[comp*7 + 1] = new BatchNorm();
+                operands[comp*7 + 2] = new ReLU();
                 //1x1 bottleneck
-                operands[comp*7 + 2] = new cuConv2D(
+                operands[comp*7 + 3] = new cuConv2D(
                         cudnn,
                         shape4(4 * k, k0 + k * comp, 1, 1),
                         1, 1, 0, 0, false
                         );
-                operands[comp*7 + 3] = new BatchNorm();
-                operands[comp*7 + 4] = new ReLU();
+                operands[comp*7 + 4] = new BatchNorm();
+                operands[comp*7 + 5] = new ReLU();
                 //3x3 convolution
-                operands[comp*7 + 5] = new cuConv2D(
+                operands[comp*7 + 6] = new cuConv2D(
                         cudnn,
                         shape4(k, 4 * k, 3, 3),
                         1, 1, 1, 1, false
                         );
-                operands[comp*7 + 6] = new ChannelConcatenater(2, k0 + k * (comp+1));
             }
+            
+            operands[operandCount-1] = new ChannelConcatenater(2, k0 + k * l, {7});
             
             //initialize block parameters
             operands[0]->initNetParams(info, shape4(n, k0, inShape.h, inShape.w));
-            for(uint32 i = 1; i < l * 7; i++){
+            for(uint32 i = 1; i < operandCount; i++){
                 operands[i]->initNetParams(info, operands[i-1]->Y->A->dims);
             }
             
+        }
+        
+        void postWaiveInit(OptimizerInfo *inf) override{
             //waive
             operands[0]->bindInput(X);
-            for(uint32 i = 1; i < l * 7; i++){
+            for(uint32 i = 1; i < operandCount; i++){
                 operands[i]->bindPrev(operands[i-1]);
                 operands[i]->bindInput(operands[i-1]->Y);
+                operands[i-1]->bindNext(operands[i]);
             }
             
-            //bind the concatenaters
-            ((ChannelConcatenater*)operands[6])->Xs[1] = X;
-            for(uint32 comp = 1; comp < l; comp++){
-                ((ChannelConcatenater*)operands[comp*7 + 6])->Xs[1] = operands[comp*7 - 1]->Y;
+            for(uint32 i = 0; i < operandCount; i++){
+                operands[i]->postWaiveInit(inf);
             }
         }
         
@@ -89,6 +97,8 @@ namespace seann {
         void updateParams() override;
         
         void batchUpdateParams() override;
+        
+        void randFillNetParams() override;
         
         void zeroGrads() override;
         

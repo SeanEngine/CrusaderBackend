@@ -149,6 +149,7 @@ namespace seblas{
     //[UNP] when batchsize < 2, results are different from cudnn
     Tensor* batchNorm(Tensor* X, Tensor* beta, Tensor* gamma,
                       Tensor* mean, Tensor* var, Tensor* Y, Tensor* xHat){
+    
         assert(X->dims.n == Y->dims.n);
         assert(X->dims.size == Y->dims.size);
         assert(X->dims.n <= BATCH_NORM_MAX_PARALLEL);

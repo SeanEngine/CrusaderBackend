@@ -81,7 +81,7 @@ namespace seann {
                            Y->A->dims.size * sizeof(float), cudaMemcpyDeviceToDevice);
                 assertCuda(__FILE__, __LINE__);
     
-                for (auto i = 0; i < operandCount; i++) {
+                for (auto i = (int)operandCount-1; i >= 0; i--) {
                     branchOperands[i]->xGrads();
                 }
             }else{

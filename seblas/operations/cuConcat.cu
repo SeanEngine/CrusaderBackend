@@ -32,6 +32,15 @@ namespace seblas {
     }
     
     Parameter* concat(Parameter** Xs, uint32 paramCount, Parameter* Y){
+        
+        uint32 c = 0;
+        for(uint32 id = 0; id < paramCount; id++){
+            assert(Xs[id]->A->dims.n == Y->A->dims.n);
+            assert(Xs[id]->A->dims.h == Y->A->dims.h);
+            assert(Xs[id]->A->dims.w == Y->A->dims.w);
+            c+= Xs[id]->A->dims.c;
+        }
+        assert(c == Y->A->dims.c);
         uint32 block = CUDA_BLOCK_SIZE.x * CUDA_BLOCK_SIZE.y;
         uint32 grid = (Y->A->dims.size + block - 1) / block;
         concatD<<<grid, block>>>(Xs, paramCount, Y);

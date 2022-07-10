@@ -25,11 +25,13 @@ namespace seann {
     
     class OperandBase {
     public:
-        Parameter* X{};  //input, a shadow of the output of prev operand
-        Parameter* Y{};  //output
+        Parameter* X;  //input, a shadow of the output of prev operand
+        Parameter* Y;  //output
         
         OperandBase* prev = nullptr;
         OperandBase* next = nullptr;
+        
+        uint32 operandID = 0;
         
         //calculate : X -> Y
         virtual void forward() = 0;

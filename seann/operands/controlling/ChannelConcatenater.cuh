@@ -12,12 +12,24 @@ namespace seann {
     public:
         uint32 paramCount;
         uint32 outputChannels;
+        uint32* locations;
+        bool useLocationGrabber = false;
         Parameter** Xs{};
         
         explicit ChannelConcatenater(uint32 paramCount, uint32 outputChannels) : OperandBase() {
             this->paramCount = paramCount;
             cudaMallocHost(&Xs, sizeof(Parameter*) * paramCount);
             this->outputChannels = outputChannels;
+        }
+        
+        ChannelConcatenater(uint32 paramCount, uint32 outputChannels, std::initializer_list<uint32> operandOutputs)
+        : ChannelConcatenater(paramCount, outputChannels){
+            assert(operandOutputs.size() == paramCount - 1);
+            useLocationGrabber = true;
+            cudaMallocHost(&locations, sizeof(uint32) * (paramCount - 1));
+            for (auto i = 0; i < paramCount - 1; i++) {
+                locations[i] = operandOutputs.begin()[i];
+            }
         }
         
         void bindParams(std::initializer_list<Parameter*> ps) const {
@@ -37,7 +49,15 @@ namespace seann {
         void initNetParams(OptimizerInfo *info, shape4 inShape) override{
             X = Parameter::declare(inShape);
             Y = Parameter::create(inShape.n, outputChannels, inShape.w, inShape.h);
+        }
+        
+        void postWaiveInit(OptimizerInfo *inf) override{
             Xs[0] = X;
+            if(useLocationGrabber){
+                for (auto i = 1; i < paramCount; i++) {
+                    Xs[i] = tracePrev(locations[i-1])->Y;
+                }
+            }
         }
         
         void forward() override;

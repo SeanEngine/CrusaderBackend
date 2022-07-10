@@ -68,6 +68,12 @@ namespace seblas {
             this->dAReserve->attach(src->dAReserve);
             return this;
         }
+        
+        void eliminate() const{
+            A->eliminate();
+            dA->eliminate();
+            dAReserve->eliminate();
+        }
     };
     
 } // seblas

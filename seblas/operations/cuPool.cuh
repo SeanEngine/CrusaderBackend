@@ -12,9 +12,14 @@ namespace seblas {
     void maxPool(Tensor* X, Tensor* Y, Tensor* record,
                  uint32 strideH, uint32 strideW, uint32 rangeH, uint32 rangeW);
     
-    void maxPoolBack(Tensor* X, Tensor* Y, Tensor* record,
+    void maxPoolBack(Tensor* dX, Tensor* dY, Tensor* record,
                      uint32 strideH, uint32 strideW, uint32 rangeH, uint32 rangeW);
     
+    void avgPool(Tensor* X, Tensor* Y, uint32 strideH, uint32 strideW, uint32 rangeH
+                 , uint32 rangeW);
+    
+    void avgPoolBack(Tensor* dX, Tensor* dY, uint32 strideH, uint32 strideW, uint32 rangeH
+                     , uint32 rangeW);
 } // seblas
 
 #endif //CRUSADER_CUPOOL_CUH

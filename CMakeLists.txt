@@ -99,7 +99,7 @@ add_executable(Crusader main.cu
         seann/operands/controlling/ChannelConcatenater.cu
         seann/operands/controlling/ChannelConcatenater.cuh
         seann/seann.cuh
-        )
+        seann/operands/seblas/AvgPool2D.cu seann/operands/seblas/AvgPool2D.cuh)
 
 include_directories(${CUDNN_PATH}/include)
 link_directories(${CUDNN_PATH} ${CUDNN_PATH}/bin ${CUDNN_PATH}/lib/x64 ${CUDNN_PATH}/dec/dll_x64)
