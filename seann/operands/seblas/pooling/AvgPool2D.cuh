@@ -5,7 +5,7 @@
 #ifndef CRUSADER_AVGPOOL2D_CUH
 #define CRUSADER_AVGPOOL2D_CUH
 
-#include "../OperandBase.cuh"
+#include "../../OperandBase.cuh"
 
 namespace seann {
     

@@ -7,7 +7,7 @@
 
 #include "../OperandBase.cuh"
 #include "../seblas/BatchNorm.cuh"
-#include "../seblas/ReLU.cuh"
+#include "../seblas/activate/ReLU.cuh"
 #include "../cudnn/cuConv2D.cuh"
 #include "../controlling/ChannelConcatenater.cuh"
 
@@ -106,6 +106,27 @@ namespace seann {
         
         uint32 OPERAND_ID() override {
             return 0xb001;
+        }
+        
+        float getOptimLR() override{
+            //since conv layer has build in optimizers
+            return operands[3]->getOptimLR();
+        }
+        
+        float getL2Const() override{
+            return operands[3]->getL2Const();
+        }
+        
+        void updateOptimLR(float val) override{
+            for(uint32 i = 0; i < operandCount; i++){
+                operands[i]->updateOptimLR(val);
+            }
+        }
+        
+        void updateL2Const(float val) override{
+            for(uint32 i = 0; i < operandCount; i++){
+                operands[i]->updateL2Const(val);
+            }
         }
     };
     

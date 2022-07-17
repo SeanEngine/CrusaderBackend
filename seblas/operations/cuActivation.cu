@@ -91,6 +91,14 @@ namespace seblas {
         }
     }
     
+    __global__ void leakyReluDGradFast(Tensor* Z, Tensor* dY, Tensor* dZ, float alpha){
+        uint32 idx = threadIdx.x + blockIdx.x * blockDim.x;
+        if (idx < Z->dims.size) {
+            float val = Z->elements[idx];
+            dZ->elements[idx] = val > 0 ? dY->elements[idx] : alpha * dY->elements[idx];
+        }
+    }
+    
     __global__ void leakyRelu4D(Tensor* input,Tensor* output, float alpha){
         uint32 idx = (threadIdx.x + blockIdx.x * blockDim.x) * 4;
         float regis[4];
@@ -114,6 +122,23 @@ namespace seblas {
             regis[2] = regis[2] > 0 ? 1.0f : alpha;
             regis[3] = regis[3] > 0 ? 1.0f : alpha;
             toFloat4R(output->elements[idx]) = toFloat4R(regis[0]);
+        }
+    }
+    
+    __global__ void leakyRelu4DGradFast(Tensor* Z, Tensor* dY, Tensor* dZ, float alpha){
+        uint32 idx = (threadIdx.x + blockIdx.x * blockDim.x) * 4;
+        float regisZ[4];
+        float regisDY[4];
+        float regisDZ[4];
+        if (idx < Z->dims.size) {
+            toFloat4R(regisZ[0]) = toFloat4R(Z->elements[idx]);
+            toFloat4R(regisDY[0]) = toFloat4R(dY->elements[idx]);
+            toFloat4R(regisDZ[0]) = toFloat4R(dZ->elements[idx]);
+            regisDZ[0] = regisZ[0] > 0 ? regisDY[0] : alpha * regisDY[0];
+            regisDZ[1] = regisZ[1] > 0 ? regisDY[1] : alpha * regisDY[1];
+            regisDZ[2] = regisZ[2] > 0 ? regisDY[2] : alpha * regisDY[2];
+            regisDZ[3] = regisZ[3] > 0 ? regisDY[3] : alpha * regisDY[3];
+            toFloat4R(dZ->elements[idx]) = toFloat4R(regisDZ[0]);
         }
     }
     
@@ -240,46 +265,46 @@ namespace seblas {
         }
     }
     
-    Tensor* relu(Tensor* X, Tensor* outX){
+    Tensor* relu(Tensor* X, Tensor* Y){
         uint32 block = CUDA_BLOCK_SIZE.y * CUDA_BLOCK_SIZE.x;
         uint32 grid = topOff(X->dims.size, block);
         if(X->dims.size % 4 == 0){
             grid = topOff(X->dims.size, block*4);
-            relu4D<<<grid, block>>>(X, outX);
+            relu4D<<<grid, block>>>(X, Y);
         }else{
-            reluD<<<grid, block>>>(X, outX);
+            reluD<<<grid, block>>>(X, Y);
         }
         cudaDeviceSynchronize();
         assertCuda(__FILE__,__LINE__);
-        return outX;
+        return Y;
     }
     
-    Tensor* reluGrad(Tensor* X, Tensor* outX){
+    Tensor* reluGrad(Tensor* dY, Tensor* dX){
+        uint32 block = CUDA_BLOCK_SIZE.y * CUDA_BLOCK_SIZE.x;
+        uint32 grid = topOff(dY->dims.size, block);
+        if(dY->dims.size % 4 == 0){
+            grid = topOff(dY->dims.size, block * 4);
+            relu4DGrad<<<grid, block>>>(dY, dX);
+        }else{
+            reluDGrad<<<grid, block>>>(dY, dX);
+        }
+        cudaDeviceSynchronize();
+        assertCuda(__FILE__,__LINE__);
+        return dX;
+    }
+    
+    Tensor* reluGradFast(Tensor* X, Tensor* dY, Tensor* dX){
         uint32 block = CUDA_BLOCK_SIZE.y * CUDA_BLOCK_SIZE.x;
         uint32 grid = topOff(X->dims.size, block);
         if(X->dims.size % 4 == 0){
-            grid = topOff(X->dims.size, block*4);
-            relu4DGrad<<<grid, block>>>(X, outX);
+            grid = topOff(X->dims.size, block * 4);
+            relu4DGradFast<<<grid, block>>>(X, dY, dX);
         }else{
-            reluDGrad<<<grid, block>>>(X, outX);
+            reluDGradFast<<<grid, block>>>(X, dY, dX);
         }
         cudaDeviceSynchronize();
         assertCuda(__FILE__,__LINE__);
-        return outX;
-    }
-    
-    Tensor* reluGradFast(Tensor* Z, Tensor* dY, Tensor* dZ){
-        uint32 block = CUDA_BLOCK_SIZE.y * CUDA_BLOCK_SIZE.x;
-        uint32 grid = topOff(Z->dims.size, block);
-        if(Z->dims.size % 4 == 0){
-            grid = topOff(Z->dims.size, block*4);
-            relu4DGradFast<<<grid, block>>>(Z, dY, dZ);
-        }else{
-            reluDGradFast<<<grid, block>>>(Z, dY, dZ);
-        }
-        cudaDeviceSynchronize();
-        assertCuda(__FILE__,__LINE__);
-        return dZ;
+        return dX;
     }
     
     Tensor* lRelu(Tensor* X, Tensor* outX, float alpha){
@@ -308,6 +333,20 @@ namespace seblas {
         cudaDeviceSynchronize();
         assertCuda(__FILE__,__LINE__);
         return outX;
+    }
+    
+    Tensor* lReluGradFast(Tensor* Z, Tensor* dY, Tensor* dZ, float alpha){
+        uint32 block = CUDA_BLOCK_SIZE.y * CUDA_BLOCK_SIZE.x;
+        uint32 grid = topOff(Z->dims.size, block);
+        if(Z->dims.size % 4 == 0){
+            grid = topOff(Z->dims.size, block*4);
+            leakyRelu4DGradFast<<<grid, block>>>(Z, dY, dZ, alpha);
+        }else{
+            leakyReluDGradFast<<<grid, block>>>(Z, dY, dZ, alpha);
+        }
+        cudaDeviceSynchronize();
+        assertCuda(__FILE__,__LINE__);
+        return dZ;
     }
     
     Tensor* elu(Tensor* X, Tensor* outX, float alpha){

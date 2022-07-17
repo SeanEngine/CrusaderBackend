@@ -82,10 +82,10 @@ add_executable(Crusader main.cu
         seann/operands/seblas/Conv2D.cuh
         seann/operands/seblas/BatchNorm.cu
         seann/operands/seblas/BatchNorm.cuh
-        seann/operands/seblas/MaxPool2D.cu
-        seann/operands/seblas/MaxPool2D.cuh
-        seann/operands/seblas/ReLU.cu
-        seann/operands/seblas/ReLU.cuh
+        seann/operands/seblas/pooling/MaxPool2D.cu
+        seann/operands/seblas/pooling/MaxPool2D.cuh
+        seann/operands/seblas/activate/ReLU.cu
+        seann/operands/seblas/activate/ReLU.cuh
         seann/operands/seblas/Softmax.cu
         seann/operands/seblas/Softmax.cuh
         seann/operands/seblas/Dropout.cu
@@ -99,7 +99,7 @@ add_executable(Crusader main.cu
         seann/operands/controlling/ChannelConcatenater.cu
         seann/operands/controlling/ChannelConcatenater.cuh
         seann/seann.cuh
-        seann/operands/seblas/AvgPool2D.cu seann/operands/seblas/AvgPool2D.cuh)
+        seann/operands/seblas/pooling/AvgPool2D.cu seann/operands/seblas/pooling/AvgPool2D.cuh seann/operands/seblas/pooling/GlobalAvgPool.cu seann/operands/seblas/pooling/GlobalAvgPool.cuh seann/operands/seblas/activate/LReLU.cu seann/operands/seblas/activate/LReLU.cuh)
 
 include_directories(${CUDNN_PATH}/include)
 link_directories(${CUDNN_PATH} ${CUDNN_PATH}/bin ${CUDNN_PATH}/lib/x64 ${CUDNN_PATH}/dec/dll_x64)

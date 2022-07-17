@@ -118,6 +118,20 @@ namespace seblas {
         }
     }
     
+    __global__ void globalAvgPoolBackD(Tensor* dX, Tensor* dY){
+        uint32 tid = threadIdx.x + blockDim.x * blockIdx.x;
+        uint32 step = dX->dims.h * dX->dims.w;
+        if(tid > dY->dims.c * dY->dims.n) return;
+        
+        float grad = dY->elements[tid];
+        grad /= (float)step;
+    
+        #pragma unroll
+        for(uint32 i = 0; i < step; i++){
+            dX->elements[tid * step + i] = grad;
+        }
+    }
+    
     void maxPool(Tensor* X, Tensor* Y, Tensor* record, uint32 strideH, uint32 strideW, uint32 rangeH, uint32 rangeW){
         assert((X->dims.h - (rangeH - strideH)) / strideH == Y->dims.h);
         assert((X->dims.w - (rangeW - strideW)) / strideW == Y->dims.w);
@@ -150,6 +164,21 @@ namespace seblas {
         uint32 block = CUDA_BLOCK_SIZE.x * CUDA_BLOCK_SIZE.y;
         uint32 grid = (Y->dims.size + block - 1)/block;
         avgPoolBackD<<<grid, block>>>(X, Y, strideH, strideW, rangeH, rangeW);
+        cudaDeviceSynchronize();
+        assertCuda(__FILE__, __LINE__);
+    }
+    
+    void globalAvgPool(Tensor* X, Tensor* Y, Tensor* buffer){
+        uint32 step = X->dims.h * X->dims.w;
+        reduce(X, Y, buffer, step);
+        *Y / (float)step;
+        assertCuda(__FILE__, __LINE__);
+    }
+    
+    void globalAvgPoolBack(Tensor* dX, Tensor* dY){
+        uint32 block = CUDA_BLOCK_SIZE.x * CUDA_BLOCK_SIZE.y;
+        uint32 grid = (dY->dims.size + block - 1)/block;
+        globalAvgPoolBackD<<<grid, block>>>(dX, dY);
         cudaDeviceSynchronize();
         assertCuda(__FILE__, __LINE__);
     }

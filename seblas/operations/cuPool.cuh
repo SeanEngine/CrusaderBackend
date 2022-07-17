@@ -6,6 +6,7 @@
 #define CRUSADER_CUPOOL_CUH
 
 #include "../tensor/Tensor.cuh"
+#include "../operations/cuReduce.cuh"
 
 namespace seblas {
     
@@ -20,6 +21,10 @@ namespace seblas {
     
     void avgPoolBack(Tensor* dX, Tensor* dY, uint32 strideH, uint32 strideW, uint32 rangeH
                      , uint32 rangeW);
+    
+    void globalAvgPool(Tensor* X, Tensor* Y, Tensor* buffer);
+    
+    void globalAvgPoolBack(Tensor* dX, Tensor* dY);
 } // seblas
 
 #endif //CRUSADER_CUPOOL_CUH
