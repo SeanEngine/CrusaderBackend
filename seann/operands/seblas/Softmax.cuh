@@ -10,9 +10,6 @@
 
 namespace seann {
     
-    OperandBase* DEC_OPR_SOFTMAX_INFO(fstream* fin, uint64& offset);
-    void DEC_OPR_SOFTMAX_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
-    
     class Softmax : public OperandBase {
     public:
         uint32 INPUT_SIZE{};
@@ -28,9 +25,6 @@ namespace seann {
             X = Parameter::declare(inShape.n, 1, INPUT_SIZE, 1);
             Y = Parameter::create(inShape.n, 1, INPUT_SIZE, 1);
             reduceBuffer = INPUT_SIZE / 1024 > 0 ? Tensor::create(INPUT_SIZE,1) : nullptr;
-            
-            decodeInfo = DEC_OPR_SOFTMAX_INFO;
-            decodeParams = DEC_OPR_SOFTMAX_PARAM;
         }
         
         void forward() override;

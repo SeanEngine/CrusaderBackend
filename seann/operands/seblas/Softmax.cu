@@ -24,12 +24,4 @@ namespace seann {
     uint32 Softmax::encodeNetParams(fstream *fout, uint64 offset) {
         return 0;
     }
-    
-    OperandBase* DEC_OPR_SOFTMAX_INFO(fstream* fin, uint64& offset) {
-        return new Softmax();
-    }
-    
-    void DEC_OPR_SOFTMAX_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape) {
-        opr->initNetParams(info, inShape);
-    }
 } // seann

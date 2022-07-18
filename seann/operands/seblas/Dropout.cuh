@@ -11,9 +11,6 @@
 
 namespace seann {
     
-    OperandBase* DEC_OPR_DROPOUT_INFO(fstream* fin, uint64& offset);
-    void DEC_OPR_DROPOUT_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
-    
     class Dropout : public OperandBase{
     public:
         float p;
@@ -21,8 +18,6 @@ namespace seann {
         
         explicit Dropout(float prop) : OperandBase() {
             p = prop;
-            decodeInfo = DEC_OPR_DROPOUT_INFO;
-            decodeParams = DEC_OPR_DROPOUT_PARAM;
         }
         
         void forward() override;

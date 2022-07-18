@@ -24,16 +24,4 @@ namespace seann {
     uint32 LReLU::encodeNetParams(fstream *fout, uint64 offset) {
         return 0;
     }
-    
-    OperandBase* DEC_OPR_LRELU_INFO(fstream* fin, uint64& offset) {
-        float alpha;
-        fin->seekg((long long) offset);
-        fin->read((char*)&alpha, sizeof(float));
-        offset += sizeof(float);
-        return new LReLU(alpha);
-    }
-    
-    void DEC_OPR_LRELU_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape) {
-        opr->initNetParams(info, inShape);
-    }
 } // seann

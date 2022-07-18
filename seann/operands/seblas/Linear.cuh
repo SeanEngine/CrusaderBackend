@@ -11,9 +11,6 @@
 
 namespace seann {
     
-    OperandBase* DEC_OPR_LINEAR_INFO(fstream* fin, uint64& offset);
-    void DEC_OPR_LINEAR_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
-    
     class Linear : public OperandBase {
     public:
         NetParam* weights{};
@@ -23,8 +20,6 @@ namespace seann {
         
         explicit Linear(uint32 OUTPUT_SIZE){
             this->OUTPUT_SIZE = OUTPUT_SIZE;
-            decodeInfo = DEC_OPR_LINEAR_INFO;
-            decodeParams = DEC_OPR_LINEAR_PARAM;
         }
         
         string info() override {

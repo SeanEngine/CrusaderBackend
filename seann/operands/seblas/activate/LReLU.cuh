@@ -11,9 +11,7 @@
 
 namespace seann {
     
-    OperandBase* DEC_OPR_LRELU_INFO(fstream* fin, uint64& offset);
-    void DEC_OPR_LRELU_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
-    
+
     class LReLU : public OperandBase{
     public:
         uint32 INPUT_SIZE{};
@@ -21,8 +19,6 @@ namespace seann {
         float alpha;
         explicit LReLU(float alpha){
             this->alpha = alpha;
-            decodeInfo = DEC_OPR_LRELU_INFO;
-            decodeParams = DEC_OPR_LRELU_PARAM;
         }
     
         string info() override {

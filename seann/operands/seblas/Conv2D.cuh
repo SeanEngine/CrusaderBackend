@@ -11,9 +11,6 @@
 
 namespace seann {
     
-    OperandBase* DEC_OPR_CONV2D_INFO(fstream* fin, uint64& offset);
-    void DEC_OPR_CONV2D_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
-    
     class Conv2D : public OperandBase {
     public:
         shape4 filterShape;
@@ -30,8 +27,6 @@ namespace seann {
         Conv2D(shape4 filterShape, uint32 strideH, uint32 strideW, uint32 padH, uint32 padW, bool WITH_BIAS)
                 : filterShape(filterShape), strideH(strideH), strideW(strideW), padH(padH), padW(padW) {
             this->WITH_BIAS = WITH_BIAS;
-            decodeInfo = DEC_OPR_CONV2D_INFO;
-            decodeParams = DEC_OPR_CONV2D_PARAM;
         }
         
         string info() override {

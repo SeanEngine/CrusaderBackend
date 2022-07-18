@@ -11,17 +11,11 @@
 
 namespace seann {
     
-    OperandBase* DEC_OPR_GLOBALAVGPOOL_INFO(fstream* fin, uint64& offset);
-    void DEC_OPR_GLOBALAVGPOOL_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
-    
     class GlobalAvgPool : public OperandBase {
     public:
         Tensor* buffer = nullptr;  //for reduction
         
-        GlobalAvgPool(){
-            decodeInfo = DEC_OPR_GLOBALAVGPOOL_INFO;
-            decodeParams = DEC_OPR_GLOBALAVGPOOL_PARAM;
-        }
+        GlobalAvgPool() = default;
     
         void randFillNetParams() override{}
     

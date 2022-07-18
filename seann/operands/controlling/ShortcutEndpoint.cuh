@@ -10,14 +10,9 @@
 #define OPR_CTRL_SHORTCUTENDPOINT_BEG 0xf002
 #define OPR_CTRL_SHORTCUTENDPOINT_END 0xf003
 
+
 namespace seann {
-    
-    OperandBase* DEC_OPR_SHORTCUTENDPOINT_BEG_INFO(fstream* fin, uint64& offset);
-    void DEC_OPR_SHORTCUTENDPOINT_BEG_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
-    
-    OperandBase* DEC_OPR_SHORTCUTENDPOINT_END_INFO(fstream* fin, uint64& offset);
-    void DEC_OPR_SHORTCUTENDPOINT_END_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
-    
+   
     class ShortcutEndpoint : public OperandBase {
     public:
         bool isContainer;
@@ -37,14 +32,6 @@ namespace seann {
                     branchOperands[i] = operands.begin()[i];
                 }
             }
-            
-            if(isContainer){
-                decodeInfo = DEC_OPR_SHORTCUTENDPOINT_END_INFO;
-                decodeParams = DEC_OPR_SHORTCUTENDPOINT_END_PARAM;
-            } else {
-                decodeInfo = DEC_OPR_SHORTCUTENDPOINT_BEG_INFO;
-                decodeParams = DEC_OPR_SHORTCUTENDPOINT_BEG_PARAM;
-            }
         }
         
         ShortcutEndpoint(bool isContainer, uint32 uuid, OperandBase** operands, uint32 operandCount){
@@ -54,14 +41,6 @@ namespace seann {
             if(isContainer && operands != nullptr){
                 this->operandCount = operandCount;
                 branchOperands = operands;
-            }
-            
-            if(isContainer){
-                decodeInfo = DEC_OPR_SHORTCUTENDPOINT_END_INFO;
-                decodeParams = DEC_OPR_SHORTCUTENDPOINT_END_PARAM;
-            } else {
-                decodeInfo = DEC_OPR_SHORTCUTENDPOINT_BEG_INFO;
-                decodeParams = DEC_OPR_SHORTCUTENDPOINT_BEG_PARAM;
             }
         }
         

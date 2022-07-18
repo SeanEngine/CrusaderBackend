@@ -79,38 +79,5 @@ namespace seann {
         return runningOffset - offset;
     }
     
-    OperandBase *DEC_OPR_CONV2D_INFO(fstream *fin, uint64& offset) {
-        uint32 runningOffset = offset;
-        uint32 strideH, strideW, padH, padW, n;
-        uint32 fn, fc, fh, fw;
-        fin->seekg(runningOffset);
-        fin->read((char*)&fn, sizeof(uint32));
-        fin->read((char*)&fc, sizeof(uint32));
-        fin->read((char*)&fh, sizeof(uint32));
-        fin->read((char*)&fw, sizeof(uint32));
-        
-        fin->read((char*)&strideH, sizeof(uint32));
-        fin->read((char*)&strideW, sizeof(uint32));
-        fin->read((char*)&padH, sizeof(uint32));
-        fin->read((char*)&padW, sizeof(uint32));
-        fin->read((char*)&n, sizeof(uint32));
-        runningOffset += sizeof(uint32) * 5;
-        offset = runningOffset;
-        
-        return new Conv2D(shape4(fn, fc, fh, fw), strideH, strideW, padH, padW,
-                                 n > 0);
-    }
-    
-    void DEC_OPR_CONV2D_PARAM(fstream *fin, uint64& offset, OperandBase *opr, OptimizerInfo* info, shape4 inShape) {
-        uint64 runningOffset = offset;
-        auto *conv = (Conv2D*)opr;
-        conv->initNetParams(info, inShape);
-        NetParam::decodeNetParamData(fin, runningOffset, conv->filter);
-        if(conv->WITH_BIAS){
-            NetParam::decodeNetParamData(fin, runningOffset, conv->bias);
-        }
-        offset = runningOffset;
-    }
-    
     
 } // seann

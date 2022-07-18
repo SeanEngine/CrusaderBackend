@@ -13,9 +13,6 @@
 
 namespace seann {
     
-    OperandBase* DEC_OPR_BATCHNORM_INFO(fstream* fin, uint64& offset);
-    void DEC_OPR_BATCHNORM_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
-    
     class BatchNorm : public OperandBase {
     public:
         NetParam* beta{};
@@ -24,10 +21,7 @@ namespace seann {
         Tensor* variance{};
         Tensor* xHatP{};
         
-        BatchNorm() : OperandBase() {
-            decodeInfo = DEC_OPR_BATCHNORM_INFO;
-            decodeParams = DEC_OPR_BATCHNORM_PARAM;
-        }
+        BatchNorm() = default;
         
         void initNetParams(OptimizerInfo *info, shape4 inShape) override {
             shape4 paramShape = {1, inShape.c, inShape.h, inShape.w};

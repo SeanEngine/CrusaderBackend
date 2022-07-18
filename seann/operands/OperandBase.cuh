@@ -9,9 +9,6 @@
 #include "../optimizers/Optimizers.cuh"
 #include "../containers/NetParam.cuh"
 
-#include <iostream>
-#include <fstream>
-
 using namespace std;
 extern cudnnHandle_t cudnn;
 
@@ -24,11 +21,6 @@ namespace seann {
         
         OperandBase* prev = nullptr;
         OperandBase* next = nullptr;
-    
-        typedef OperandBase* (*InfoDecoder)(fstream*, uint64&);
-        typedef void (*ParamDecoder)(fstream*, uint64&, OperandBase*, OptimizerInfo*, shape4 inShape);
-        InfoDecoder decodeInfo;
-        ParamDecoder decodeParams;
         
         uint32 operandID = 0;
         

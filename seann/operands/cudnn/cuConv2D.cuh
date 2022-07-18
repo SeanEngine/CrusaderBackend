@@ -11,9 +11,6 @@
 
 namespace seann {
     
-    OperandBase* DEC_OPR_CUDNN_CONV2D_INFO(fstream* fin, uint64& offset);
-    void DEC_OPR_CUDNN_CONV2D_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
-    
     class cuConv2D : public OperandBase {
     public:
         cudnnFilterDescriptor_t filterDesc{};
@@ -56,9 +53,6 @@ namespace seann {
                                        (int)filterShape.c,
                                        (int)filterShape.h,
                                        (int)filterShape.w);
-            
-            decodeInfo = DEC_OPR_CUDNN_CONV2D_INFO;
-            decodeParams = DEC_OPR_CUDNN_CONV2D_PARAM;
         }
         
         string info() override {

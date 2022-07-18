@@ -11,9 +11,6 @@
 
 namespace seann {
     
-    OperandBase* DEC_OPR_MAXPOOL2D_INFO(fstream* fin, uint64& offset);
-    void DEC_OPR_MAXPOOL2D_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
-    
     class MaxPool2D : public OperandBase{
     public:
         Tensor* record{};
@@ -27,9 +24,6 @@ namespace seann {
             this->strideW = strideW;
             this->rangeH = rangeH;
             this->rangeW = rangeW;
-            
-            decodeInfo = DEC_OPR_MAXPOOL2D_INFO;
-            decodeParams = DEC_OPR_MAXPOOL2D_PARAM;
         }
     
         void randFillNetParams() override{}

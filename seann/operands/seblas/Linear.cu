@@ -73,20 +73,4 @@ namespace seann {
         runningOffset += biases->encodeNetParamData(fout, runningOffset);
         return runningOffset - offset;
     }
-    
-    OperandBase* DEC_OPR_LINEAR_INFO(fstream* fin, uint64& offset){
-        uint32 OUTPUT_SIZE;
-        fin->seekg(offset);
-        fin->read((char*)&OUTPUT_SIZE, sizeof(uint32));
-        auto* opr = new Linear(OUTPUT_SIZE);
-        offset += sizeof(uint32);
-        return opr;
-    }
-    
-    void DEC_OPR_LINEAR_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape){
-        auto* linear = (Linear*)opr;
-        linear->initNetParams(info, inShape);
-        NetParam::decodeNetParamData(fin, offset, linear->weights);
-        NetParam::decodeNetParamData(fin, offset, linear->biases);
-    }
 } // seann

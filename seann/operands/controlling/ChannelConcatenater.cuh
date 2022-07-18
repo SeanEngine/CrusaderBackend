@@ -11,9 +11,6 @@
 
 namespace seann {
     
-    OperandBase* DEC_OPR_CHANNELCONCATENATER_INFO(fstream* fin, uint64& offset);
-    void DEC_OPR_CHANNELCONCATENATER_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
-    
     class ChannelConcatenater : public OperandBase {
     public:
         uint32 paramCount;
@@ -26,8 +23,6 @@ namespace seann {
             this->paramCount = paramCount;
             cudaMallocHost(&Xs, sizeof(Parameter*) * paramCount);
             this->outputChannels = outputChannels;
-            decodeInfo = DEC_OPR_CHANNELCONCATENATER_INFO;
-            decodeParams = DEC_OPR_CHANNELCONCATENATER_PARAM;
         }
         
         ChannelConcatenater(uint32 paramCount, uint32 outputChannels, std::initializer_list<uint32> operandOutputs)

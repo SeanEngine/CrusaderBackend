@@ -53,15 +53,4 @@ namespace seann {
         runningOffset += gamma->encodeNetParamData(fout, runningOffset);
         return runningOffset - offset;
     }
-    
-    OperandBase* DEC_OPR_BATCHNORM_INFO(fstream *fout, uint64& offset) {
-        return new BatchNorm();
-    }
-    
-   void DEC_OPR_BATCHNORM_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape) {
-        auto* bn = (BatchNorm*)opr;
-        bn->initNetParams(info, inShape);
-        NetParam::decodeNetParamData(fin, offset, bn->beta);
-        NetParam::decodeNetParamData(fin, offset, bn->gamma);
-    }
 } // seann

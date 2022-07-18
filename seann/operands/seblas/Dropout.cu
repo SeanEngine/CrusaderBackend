@@ -40,16 +40,4 @@ namespace seann {
         return 0;
     }
     
-    OperandBase* DEC_OPR_DROPOUT_INFO(fstream* fin, uint64& offset) {
-        float p;
-        fin->seekg((long long)offset);
-        fin->read((char*)&p, sizeof(float));
-        offset += sizeof(float);
-        return new Dropout(p);
-    }
-    
-    void DEC_OPR_DROPOUT_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape) {
-        opr->initNetParams(info, inShape);
-    }
-    
 } // seann

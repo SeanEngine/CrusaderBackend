@@ -11,17 +11,11 @@
 
 namespace seann {
     
-    OperandBase* DEC_OPR_RELU_INFO(fstream* fin, uint64& offset);
-    void DEC_OPR_RELU_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
-    
     class ReLU : public OperandBase {
     public:
         uint32 INPUT_SIZE{};
         uint32 PARALELL_SIZE{};
-        ReLU(){
-            decodeInfo = DEC_OPR_RELU_INFO;
-            decodeParams = DEC_OPR_RELU_PARAM;
-        }
+        ReLU() = default;
         
         string info() override {
             return "ReLU          { " + std::to_string(INPUT_SIZE/PARALELL_SIZE) + " }";

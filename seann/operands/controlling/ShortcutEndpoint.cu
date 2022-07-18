@@ -153,8 +153,13 @@ namespace seann {
         uint32 runningOffset = offset;
         fout->write((char *) &uuid, sizeof(uint32));
         fout->write((char *) &operandCount, sizeof(uint32));
+        runningOffset += sizeof(uint32) * 2;
         if(isContainer){
-            runningOffset += sizeof(uint32) * 2;
+            for (auto i = 0; i < operandCount; i++) {
+                uint32 temp = (branchOperands[i]->OPERAND_ID());
+                fout->write((char *) &temp, sizeof(uint32));
+                runningOffset += sizeof(uint32);
+            }
             for (auto i = 0; i < operandCount; i++) {
                 runningOffset += branchOperands[i]->encodeInfo(fout, runningOffset);
             }
@@ -170,36 +175,5 @@ namespace seann {
             }
         }
         return runningOffset - offset;
-    }
-    
-    OperandBase* DEC_OPR_SHORTCUTENDPOINT_BEG_INFO(fstream* fin, uint64& offset){
-        uint32 uuid;
-        fin->read((char *) &uuid, sizeof(uint32));
-        offset += sizeof(uint32);
-        uint32 operandCount;
-        fin->read((char *) &operandCount, sizeof(uint32));
-        offset += sizeof(uint32);
-        return new ShortcutEndpoint(false, uuid, {});
-    }
-    
-    void DEC_OPR_SHORTCUTENDPOINT_BEG_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape){
-        auto* shortcut = (ShortcutEndpoint*)opr;
-        shortcut->initNetParams(info, inShape);
-    }
-    
-    OperandBase* DEC_OPR_SHORTCUTENDPOINT_END_INFO(fstream* fin, uint64& offset){
-        uint32 uuid;
-        fin->read((char *) &uuid, sizeof(uint32));
-        offset += sizeof(uint32);
-        uint32 operandCount;
-        fin->read((char *) &operandCount, sizeof(uint32));
-        offset += sizeof(uint32);
-        
-        return new ShortcutEndpoint(true, uuid, {});
-    }
-    
-    void DEC_OPR_SHORTCUTENDPOINT_END_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape){
-        auto* shortcut = (ShortcutEndpoint*)opr;
-        shortcut->initNetParams(info, inShape);
     }
 } // seann
