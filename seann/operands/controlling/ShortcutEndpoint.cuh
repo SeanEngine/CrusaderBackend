@@ -7,7 +7,16 @@
 
 #include "../OperandBase.cuh"
 
+#define OPR_CTRL_SHORTCUTENDPOINT_BEG 0xf002
+#define OPR_CTRL_SHORTCUTENDPOINT_END 0xf003
+
 namespace seann {
+    
+    OperandBase* DEC_OPR_SHORTCUTENDPOINT_BEG_INFO(fstream* fin, uint64& offset);
+    void DEC_OPR_SHORTCUTENDPOINT_BEG_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
+    
+    OperandBase* DEC_OPR_SHORTCUTENDPOINT_END_INFO(fstream* fin, uint64& offset);
+    void DEC_OPR_SHORTCUTENDPOINT_END_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
     
     class ShortcutEndpoint : public OperandBase {
     public:
@@ -27,6 +36,32 @@ namespace seann {
                 for (auto i = 0; i < operandCount; i++) {
                     branchOperands[i] = operands.begin()[i];
                 }
+            }
+            
+            if(isContainer){
+                decodeInfo = DEC_OPR_SHORTCUTENDPOINT_END_INFO;
+                decodeParams = DEC_OPR_SHORTCUTENDPOINT_END_PARAM;
+            } else {
+                decodeInfo = DEC_OPR_SHORTCUTENDPOINT_BEG_INFO;
+                decodeParams = DEC_OPR_SHORTCUTENDPOINT_BEG_PARAM;
+            }
+        }
+        
+        ShortcutEndpoint(bool isContainer, uint32 uuid, OperandBase** operands, uint32 operandCount){
+            this->isContainer = isContainer;
+            this->uuid = uuid;
+            
+            if(isContainer && operands != nullptr){
+                this->operandCount = operandCount;
+                branchOperands = operands;
+            }
+            
+            if(isContainer){
+                decodeInfo = DEC_OPR_SHORTCUTENDPOINT_END_INFO;
+                decodeParams = DEC_OPR_SHORTCUTENDPOINT_END_PARAM;
+            } else {
+                decodeInfo = DEC_OPR_SHORTCUTENDPOINT_BEG_INFO;
+                decodeParams = DEC_OPR_SHORTCUTENDPOINT_BEG_PARAM;
             }
         }
         
@@ -53,11 +88,12 @@ namespace seann {
         }
         
         uint32 OPERAND_ID() override{
-            if(isContainer)
-                return 0xf002;
-            else
-                return 0xf001;
+            return isContainer ? OPR_CTRL_SHORTCUTENDPOINT_END : OPR_CTRL_SHORTCUTENDPOINT_BEG;
         }
+        
+        uint32 encodeInfo(fstream *fout, uint64 offset) override;
+        
+        uint32 encodeNetParams(fstream *fout, uint64 offset) override;
     };
 } // seann
 

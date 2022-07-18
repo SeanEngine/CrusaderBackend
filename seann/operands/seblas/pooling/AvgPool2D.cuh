@@ -7,7 +7,12 @@
 
 #include "../../OperandBase.cuh"
 
+#define OPR_SEBLAS_AVGPOOL2D 0xb001
+
 namespace seann {
+    
+    OperandBase* DEC_OPR_AVGPOOL2D_INFO(fstream* fin, uint64& offset);
+    void DEC_OPR_AVGPOOL2D_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
     
     class AvgPool2D : public OperandBase {
     public:
@@ -21,6 +26,9 @@ namespace seann {
             this->strideW = strideW;
             this->rangeH = rangeH;
             this->rangeW = rangeW;
+            
+            decodeInfo = DEC_OPR_AVGPOOL2D_INFO;
+            decodeParams = DEC_OPR_AVGPOOL2D_PARAM;
         }
     
         void randFillNetParams() override{}
@@ -45,8 +53,12 @@ namespace seann {
         void zeroGrads() override{}
     
         uint32 OPERAND_ID() override {
-            return 0x0b03;
+            return OPR_SEBLAS_AVGPOOL2D;
         }
+        
+        uint32 encodeInfo(fstream *fout, uint64 offset) override;
+        
+        uint32 encodeNetParams(fstream *fout, uint64 offset) override;
     };
     
 } // seann

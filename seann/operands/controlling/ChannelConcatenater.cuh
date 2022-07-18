@@ -7,7 +7,13 @@
 
 #include "../OperandBase.cuh"
 
+#define OPR_CTRL_CHANNELCONCATENATER 0xf001
+
 namespace seann {
+    
+    OperandBase* DEC_OPR_CHANNELCONCATENATER_INFO(fstream* fin, uint64& offset);
+    void DEC_OPR_CHANNELCONCATENATER_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
+    
     class ChannelConcatenater : public OperandBase {
     public:
         uint32 paramCount;
@@ -20,6 +26,8 @@ namespace seann {
             this->paramCount = paramCount;
             cudaMallocHost(&Xs, sizeof(Parameter*) * paramCount);
             this->outputChannels = outputChannels;
+            decodeInfo = DEC_OPR_CHANNELCONCATENATER_INFO;
+            decodeParams = DEC_OPR_CHANNELCONCATENATER_PARAM;
         }
         
         ChannelConcatenater(uint32 paramCount, uint32 outputChannels, std::initializer_list<uint32> operandOutputs)
@@ -32,17 +40,12 @@ namespace seann {
             }
         }
         
-        void bindParams(std::initializer_list<Parameter*> ps) const {
-            assert(ps.size() == paramCount - 1);
-            for (auto i = 1; i < paramCount; i++) {
-                this->Xs[i] = ps.begin()[i-1];
-            }
-        }
-        
-        void bindParams(Parameter** Xs0, uint32 paramCount0) const {
-            assert(paramCount0 == paramCount - 1);
-            for (auto i = 1; i < paramCount; i++) {
-                this->Xs[i] = Xs0[i-1];
+        ChannelConcatenater(uint32 paramCount, uint32 outputChannels, const uint32* poses)
+        : ChannelConcatenater(paramCount, outputChannels){
+            useLocationGrabber = false;
+            cudaMallocHost(&Xs, sizeof(Parameter*) * (paramCount - 1));
+            for (auto i = 0; i < paramCount - 1; i++) {
+                locations[i] = poses[i];
             }
         }
         
@@ -75,12 +78,16 @@ namespace seann {
         void zeroGrads() override{}
         
         uint32 OPERAND_ID() override {
-            return 0xf003;
+            return OPR_CTRL_CHANNELCONCATENATER;
         }
         
         string info() override {
             return "ChannelConcatenater   { " + std::to_string(paramCount) + " }";
         }
+        
+        uint32 encodeInfo(fstream *fout, uint64 offset) override;
+        
+        uint32 encodeNetParams(fstream *fout, uint64 offset) override;
     };
 } // seann
 

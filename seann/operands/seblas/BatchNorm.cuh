@@ -7,7 +7,15 @@
 
 #include "../OperandBase.cuh"
 
+#define OPR_SEBLAS_BATCHNORM 0x0003
+
+//TODO: change this BN to allow mean and var cumulation and proper inference
+
 namespace seann {
+    
+    OperandBase* DEC_OPR_BATCHNORM_INFO(fstream* fin, uint64& offset);
+    void DEC_OPR_BATCHNORM_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
+    
     class BatchNorm : public OperandBase {
     public:
         NetParam* beta{};
@@ -16,7 +24,10 @@ namespace seann {
         Tensor* variance{};
         Tensor* xHatP{};
         
-        BatchNorm() : OperandBase() {}
+        BatchNorm() : OperandBase() {
+            decodeInfo = DEC_OPR_BATCHNORM_INFO;
+            decodeParams = DEC_OPR_BATCHNORM_PARAM;
+        }
         
         void initNetParams(OptimizerInfo *info, shape4 inShape) override {
             shape4 paramShape = {1, inShape.c, inShape.h, inShape.w};
@@ -48,7 +59,7 @@ namespace seann {
         string info() override;
         
         uint32 OPERAND_ID() override {
-            return 0x0b01;
+            return OPR_SEBLAS_BATCHNORM;
         }
         
         float getOptimLR() override {
@@ -68,6 +79,10 @@ namespace seann {
             gamma->opt->L2 = l2;
             beta->opt->L2 = l2;
         }
+        
+        uint32 encodeInfo(fstream *fout, uint64 offset) override;
+        
+        uint32 encodeNetParams(fstream *fout, uint64 offset) override;
     };
     
 } // seann

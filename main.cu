@@ -12,43 +12,41 @@ using namespace seblas;
 using namespace seann;
 
 int main(int argc, char** argv) {
-
-    cudnnHandle_t cudnn;
-    cudnnCreate(&cudnn);
+    
     auto *model = new Sequential(shape4(64, 3, 32, 32), {
-            new cuConv2D(cudnn, shape4(24, 3, 3, 3), 1, 1, 1, 1, false),
+            new cuConv2D(shape4(24, 3, 3, 3), 1, 1, 1, 1, false),
             new BatchNorm(),
             new ReLU(),
             
-            new DenseBlock(cudnn, 12, 16),
+            new DenseBlock(12, 16),
 
             new ReLU(),
             new BatchNorm(),
-            new cuConv2D(cudnn, shape4(108,216,1,1), 1, 1, 0, 0, false),
+            new cuConv2D(shape4(108,216,1,1), 1, 1, 0, 0, false),
             
             new ChannelConcatenater(2, 132, {5}),
 
             new ReLU(),
             new BatchNorm(),
-            new cuConv2D(cudnn, shape4(108,132,1,1), 1, 1, 0, 0, false),
+            new cuConv2D(shape4(108,132,1,1), 1, 1, 0, 0, false),
             
             new AvgPool2D(2,2,2,2),
 
-            new DenseBlock(cudnn, 12, 16),
+            new DenseBlock(12, 16),
 
             new BatchNorm(),
             new ReLU(),
-            new cuConv2D(cudnn, shape4(150,300,1,1), 1, 1, 0, 0, false),
+            new cuConv2D(shape4(150,300,1,1), 1, 1, 0, 0, false),
 
             new ChannelConcatenater(2, 258, {5}),
 
             new BatchNorm(),
             new ReLU(),
-            new cuConv2D(cudnn, shape4(150,258,1,1), 1, 1, 0, 0, false),
+            new cuConv2D( shape4(150,258,1,1), 1, 1, 0, 0, false),
 
             new AvgPool2D(2,2,2,2),
 
-            new DenseBlock(cudnn, 12, 16),
+            new DenseBlock(12, 16),
             new AvgPool2D(2,2,2,2),
             
             new Linear(512),

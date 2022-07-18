@@ -14,15 +14,6 @@ namespace seann {
     
     void SGD::zeroGrad() {}
     
-    void BGD::batchApply() {
-        if(isWeight) {
-            *A->A * (1 - L2);
-        }
-        SGDApply(A->A, A->dA, LEARNING_RATE/BATCH_SIZE);
-    }
-    
-    void BGD::zeroGrad() {}
-    
     void Momentum::apply() {
         if(isWeight) {
             *A->A * (1 - L2);

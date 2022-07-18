@@ -11,6 +11,8 @@
 #include "../cudnn/cuConv2D.cuh"
 #include "../controlling/ChannelConcatenater.cuh"
 
+#define OPR_PREFAB_DENSEBLOCK 0xe001
+
 namespace seann {
     
     class DenseBlock : public OperandBase {
@@ -21,12 +23,10 @@ namespace seann {
         //dense block construction configurations
         uint32 k;
         uint32 l;
-        cudnnHandle_t cudnn;
         
-        DenseBlock( cudnnHandle_t cudnn, uint32 k, uint32 l){
+        DenseBlock(uint32 k, uint32 l){
             this->k = k;
             this->l = l;
-            this->cudnn = cudnn;
             
             //BN-ReLU-Conv-Concat
             this->operandCount = 7 * l + 1;
@@ -50,7 +50,6 @@ namespace seann {
                 operands[comp*7 + 2] = new ReLU();
                 //1x1 bottleneck
                 operands[comp*7 + 3] = new cuConv2D(
-                        cudnn,
                         shape4(4 * k, k0 + k * comp, 1, 1),
                         1, 1, 0, 0, false
                         );
@@ -58,7 +57,6 @@ namespace seann {
                 operands[comp*7 + 5] = new ReLU();
                 //3x3 convolution
                 operands[comp*7 + 6] = new cuConv2D(
-                        cudnn,
                         shape4(k, 4 * k, 3, 3),
                         1, 1, 1, 1, false
                         );
@@ -105,7 +103,7 @@ namespace seann {
         string info() override;
         
         uint32 OPERAND_ID() override {
-            return 0xb001;
+            return OPR_PREFAB_DENSEBLOCK;
         }
         
         float getOptimLR() override{
@@ -128,6 +126,10 @@ namespace seann {
                 operands[i]->updateL2Const(val);
             }
         }
+        
+        uint32 encodeInfo(fstream *fout, uint64 offset) override;
+        
+        uint32 encodeNetParams(fstream *fout, uint64 offset) override;
     };
     
 } // seann

@@ -7,13 +7,21 @@
 
 #include "../../OperandBase.cuh"
 
+#define OPR_SEBLAS_GLOBALAVGPOOL 0xb002
+
 namespace seann {
+    
+    OperandBase* DEC_OPR_GLOBALAVGPOOL_INFO(fstream* fin, uint64& offset);
+    void DEC_OPR_GLOBALAVGPOOL_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
     
     class GlobalAvgPool : public OperandBase {
     public:
         Tensor* buffer = nullptr;  //for reduction
         
-        GlobalAvgPool() = default;
+        GlobalAvgPool(){
+            decodeInfo = DEC_OPR_GLOBALAVGPOOL_INFO;
+            decodeParams = DEC_OPR_GLOBALAVGPOOL_PARAM;
+        }
     
         void randFillNetParams() override{}
     
@@ -40,8 +48,12 @@ namespace seann {
         void zeroGrads() override{}
     
         uint32 OPERAND_ID() override {
-            return 0x0b04;
+            return OPR_SEBLAS_GLOBALAVGPOOL;
         }
+        
+        uint32 encodeInfo(fstream *fout, uint64 offset) override;
+        
+        uint32 encodeNetParams(fstream *fout, uint64 offset) override;
     };
     
 } // seann

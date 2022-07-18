@@ -15,7 +15,7 @@ namespace seann {
         if(isContainer) {
             //trace the other endpoint
             OperandBase* tracer = this->tracePrev();
-            while(tracer->OPERAND_ID() != OPR_CTRL_SHORTCUT_SRC ||
+            while(tracer->OPERAND_ID() != OPR_CTRL_SHORTCUTENDPOINT_BEG ||
                     ((ShortcutEndpoint*)tracer)->uuid != uuid) {
                 tracer = tracer->tracePrev();
                 assert(tracer != nullptr);
@@ -45,7 +45,7 @@ namespace seann {
             }
         }else{
             OperandBase* tracer = this->traceNext();
-            while(tracer->OPERAND_ID() != OPR_CTRL_SHORTCUT_CTN ||
+            while(tracer->OPERAND_ID() != OPR_CTRL_SHORTCUTENDPOINT_END ||
                   ((ShortcutEndpoint*)tracer)->uuid != uuid) {
                 tracer = tracer->traceNext();
                 assert(tracer != nullptr);
@@ -147,5 +147,59 @@ namespace seann {
                 }
             }
         }
+    }
+    
+    uint32 ShortcutEndpoint::encodeInfo(fstream *fout, uint64 offset) {
+        uint32 runningOffset = offset;
+        fout->write((char *) &uuid, sizeof(uint32));
+        fout->write((char *) &operandCount, sizeof(uint32));
+        if(isContainer){
+            runningOffset += sizeof(uint32) * 2;
+            for (auto i = 0; i < operandCount; i++) {
+                runningOffset += branchOperands[i]->encodeInfo(fout, runningOffset);
+            }
+        }
+        return runningOffset - offset;
+    }
+    
+    uint32 ShortcutEndpoint::encodeNetParams(fstream *fout, uint64 offset) {
+        uint32 runningOffset = offset;
+        if(isContainer){
+            for (auto i = 0; i < operandCount; i++) {
+                runningOffset += branchOperands[i]->encodeNetParams(fout, runningOffset);
+            }
+        }
+        return runningOffset - offset;
+    }
+    
+    OperandBase* DEC_OPR_SHORTCUTENDPOINT_BEG_INFO(fstream* fin, uint64& offset){
+        uint32 uuid;
+        fin->read((char *) &uuid, sizeof(uint32));
+        offset += sizeof(uint32);
+        uint32 operandCount;
+        fin->read((char *) &operandCount, sizeof(uint32));
+        offset += sizeof(uint32);
+        return new ShortcutEndpoint(false, uuid, {});
+    }
+    
+    void DEC_OPR_SHORTCUTENDPOINT_BEG_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape){
+        auto* shortcut = (ShortcutEndpoint*)opr;
+        shortcut->initNetParams(info, inShape);
+    }
+    
+    OperandBase* DEC_OPR_SHORTCUTENDPOINT_END_INFO(fstream* fin, uint64& offset){
+        uint32 uuid;
+        fin->read((char *) &uuid, sizeof(uint32));
+        offset += sizeof(uint32);
+        uint32 operandCount;
+        fin->read((char *) &operandCount, sizeof(uint32));
+        offset += sizeof(uint32);
+        
+        return new ShortcutEndpoint(true, uuid, {});
+    }
+    
+    void DEC_OPR_SHORTCUTENDPOINT_END_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape){
+        auto* shortcut = (ShortcutEndpoint*)opr;
+        shortcut->initNetParams(info, inShape);
     }
 } // seann

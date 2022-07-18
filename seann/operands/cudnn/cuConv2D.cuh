@@ -7,11 +7,15 @@
 
 #include "../OperandBase.cuh"
 
+#define OPR_CUDNN_CONV2D 0xd002
+
 namespace seann {
+    
+    OperandBase* DEC_OPR_CUDNN_CONV2D_INFO(fstream* fin, uint64& offset);
+    void DEC_OPR_CUDNN_CONV2D_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
     
     class cuConv2D : public OperandBase {
     public:
-        cudnnHandle_t cudnn;
         cudnnFilterDescriptor_t filterDesc{};
         cudnnConvolutionDescriptor_t convDesc{};
     
@@ -28,7 +32,7 @@ namespace seann {
     
         bool WITH_BIAS = false;
     
-        cuConv2D(cudnnHandle_t cudnn, shape4 filterShape, uint32 strideH, uint32 strideW, uint32 padH, uint32 padW, bool WITH_BIAS)
+        cuConv2D(shape4 filterShape, uint32 strideH, uint32 strideW, uint32 padH, uint32 padW, bool WITH_BIAS)
         : filterShape(filterShape), strideH(strideH), strideW(strideW), padH(padH), padW(padW) {
             this->WITH_BIAS = WITH_BIAS;
     
@@ -53,7 +57,8 @@ namespace seann {
                                        (int)filterShape.h,
                                        (int)filterShape.w);
             
-            this->cudnn = cudnn;
+            decodeInfo = DEC_OPR_CUDNN_CONV2D_INFO;
+            decodeParams = DEC_OPR_CUDNN_CONV2D_PARAM;
         }
         
         string info() override {
@@ -78,7 +83,7 @@ namespace seann {
         void zeroGrads() override;
         
         uint32 OPERAND_ID() override {
-            return 0x0ad2;
+            return OPR_CUDNN_CONV2D;
         }
         
         float getOptimLR() override {
@@ -98,6 +103,10 @@ namespace seann {
             filter->opt->L2 = val;
             if (WITH_BIAS) bias->opt->L2 = val;
         }
+        
+        uint32 encodeInfo(fstream *fout, uint64 offset) override;
+        
+        uint32 encodeNetParams(fstream *fout, uint64 offset) override;
     };
     
 } // seann

@@ -42,4 +42,26 @@ namespace seann {
         beta->opt->zeroGrad();
         gamma->opt->zeroGrad();
     }
+    
+    uint32 BatchNorm::encodeInfo(fstream *fout, uint64 offset) {
+        return 0;
+    }
+    
+    uint32 BatchNorm::encodeNetParams(fstream *fout, uint64 offset) {
+        uint32 runningOffset = offset;
+        runningOffset += beta->encodeNetParamData(fout, runningOffset);
+        runningOffset += gamma->encodeNetParamData(fout, runningOffset);
+        return runningOffset - offset;
+    }
+    
+    OperandBase* DEC_OPR_BATCHNORM_INFO(fstream *fout, uint64& offset) {
+        return new BatchNorm();
+    }
+    
+   void DEC_OPR_BATCHNORM_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape) {
+        auto* bn = (BatchNorm*)opr;
+        bn->initNetParams(info, inShape);
+        NetParam::decodeNetParamData(fin, offset, bn->beta);
+        NetParam::decodeNetParamData(fin, offset, bn->gamma);
+    }
 } // seann

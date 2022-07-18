@@ -7,7 +7,13 @@
 
 #include "../OperandBase.cuh"
 
+#define OPR_SEBLAS_CONV2D 0x0002
+
 namespace seann {
+    
+    OperandBase* DEC_OPR_CONV2D_INFO(fstream* fin, uint64& offset);
+    void DEC_OPR_CONV2D_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
+    
     class Conv2D : public OperandBase {
     public:
         shape4 filterShape;
@@ -24,6 +30,8 @@ namespace seann {
         Conv2D(shape4 filterShape, uint32 strideH, uint32 strideW, uint32 padH, uint32 padW, bool WITH_BIAS)
                 : filterShape(filterShape), strideH(strideH), strideW(strideW), padH(padH), padW(padW) {
             this->WITH_BIAS = WITH_BIAS;
+            decodeInfo = DEC_OPR_CONV2D_INFO;
+            decodeParams = DEC_OPR_CONV2D_PARAM;
         }
         
         string info() override {
@@ -62,7 +70,7 @@ namespace seann {
         void zeroGrads() override;
         
         uint32 OPERAND_ID() override {
-            return 0x0a02;
+            return OPR_SEBLAS_CONV2D;
         }
         
         float getOptimLR() override {
@@ -82,6 +90,10 @@ namespace seann {
             filter->opt->L2 = val;
             if (WITH_BIAS) bias->opt->L2 = val;
         }
+        
+        uint32 encodeInfo(fstream *fout, uint64 offset) override;
+        
+        uint32 encodeNetParams(fstream *fout, uint64 offset) override;
     };
     
 } // seann

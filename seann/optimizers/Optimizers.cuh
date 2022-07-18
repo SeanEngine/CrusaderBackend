@@ -52,22 +52,6 @@ namespace seann {
         void zeroGrad() override;
     };
     
-    
-    //BGD optimizer : Batch Gradient Decent, w = w - (η * sum_batch(g))/bs
-    struct BGD : public Optimizer {
-    public:
-        float BATCH_SIZE;
-        explicit BGD(float LEARNING_RATE, Parameter* A, float BATCH_SIZE)
-                : Optimizer(LEARNING_RATE, A), BATCH_SIZE(BATCH_SIZE){}
-        
-        void apply() override {}
-        
-        void batchApply() override;
-        
-        void zeroGrad() override;
-    };
-    
-    
     //Momentum : m[t] = m[t-1] * β + (1 - β) * g[t]
     //           w[t] = w[t-1] - η * m[t]
     struct Momentum : public Optimizer {

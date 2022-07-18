@@ -9,17 +9,11 @@
 #include "../optimizers/Optimizers.cuh"
 #include "../containers/NetParam.cuh"
 
-#define OPR_SEBLAS_LINEAR 0x0a01
-#define OPR_SEBLAS_CONV2D 0x0a02
-#define OPR_CUDNN_CONV2D 0x0ad2
-#define OPR_SEBLAS_BATCHNORM 0x0b01
-#define OPR_SEBLAS_DROPOUT 0x0b02
-#define OPR_SEBLAS_MAXPOOL2D 0x0b03
-#define OPR_SEBLAS_RELU 0x0c01
-#define OPR_SEBLAS_SOFTMAX 0x0c02
+#include <iostream>
+#include <fstream>
 
-#define OPR_CTRL_SHORTCUT_SRC 0xf001
-#define OPR_CTRL_SHORTCUT_CTN 0xf002
+using namespace std;
+extern cudnnHandle_t cudnn;
 
 namespace seann {
     
@@ -30,8 +24,19 @@ namespace seann {
         
         OperandBase* prev = nullptr;
         OperandBase* next = nullptr;
+    
+        typedef OperandBase* (*InfoDecoder)(fstream*, uint64&);
+        typedef void (*ParamDecoder)(fstream*, uint64&, OperandBase*, OptimizerInfo*, shape4 inShape);
+        InfoDecoder decodeInfo;
+        ParamDecoder decodeParams;
         
         uint32 operandID = 0;
+        
+        OperandBase(){
+            if (cudnn == nullptr) {
+                cudnnCreate(&cudnn);
+            }
+        }
         
         //calculate : X -> Y
         virtual void forward() = 0;
@@ -101,6 +106,10 @@ namespace seann {
         virtual float getL2Const(){return 0;}
         
         virtual void updateL2Const(float val){}
+        
+        virtual uint32 encodeInfo(fstream* fout, uint64 offset) = 0;
+        
+        virtual uint32 encodeNetParams(fstream* fout, uint64 offset) = 0;
     };
     
 } // seann

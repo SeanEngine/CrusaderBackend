@@ -30,6 +30,13 @@ namespace seann{
             }
         }
         
+        //constructing from file
+        Sequential(shape4 inputShape, uint32 operandCount, OperandBase** operands){
+            OPERAND_COUNT = operandCount;
+            netX = Parameter::create(inputShape);
+            this->operands = operands;
+        }
+        
         void waive() const;
         
         void construct(OptimizerInfo* info);

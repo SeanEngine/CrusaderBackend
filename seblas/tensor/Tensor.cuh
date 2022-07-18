@@ -30,6 +30,7 @@ namespace seblas{
     const dim3 CUDA_BLOCK_SIZE = {16, 16};
     const dim3 CUDA_BLOCK_SIZE_3D = {16, 16, 4};
     typedef unsigned int uint32;
+    typedef unsigned long long uint64;
     const uint32 WARP_SIZE = 32;
 
     /**

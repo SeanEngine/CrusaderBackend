@@ -7,7 +7,12 @@
 
 #include "../../OperandBase.cuh"
 
+#define OPR_SEBLAS_LRELU 0xa001
+
 namespace seann {
+    
+    OperandBase* DEC_OPR_LRELU_INFO(fstream* fin, uint64& offset);
+    void DEC_OPR_LRELU_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
     
     class LReLU : public OperandBase{
     public:
@@ -16,6 +21,8 @@ namespace seann {
         float alpha;
         explicit LReLU(float alpha){
             this->alpha = alpha;
+            decodeInfo = DEC_OPR_LRELU_INFO;
+            decodeParams = DEC_OPR_LRELU_PARAM;
         }
     
         string info() override {
@@ -44,8 +51,12 @@ namespace seann {
         void zeroGrads() override{}
     
         uint32 OPERAND_ID() override {
-            return 0x0c01;
+            return OPR_SEBLAS_LRELU;
         }
+        
+        uint32 encodeInfo(fstream *fout, uint64 offset) override;
+        
+        uint32 encodeNetParams(fstream *fout, uint64 offset) override;
     };
     
 } // seann

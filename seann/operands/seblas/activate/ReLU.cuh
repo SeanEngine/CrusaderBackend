@@ -7,12 +7,21 @@
 
 #include "../../OperandBase.cuh"
 
+#define OPR_SEBLAS_RELU 0xa002
+
 namespace seann {
+    
+    OperandBase* DEC_OPR_RELU_INFO(fstream* fin, uint64& offset);
+    void DEC_OPR_RELU_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
+    
     class ReLU : public OperandBase {
     public:
         uint32 INPUT_SIZE{};
         uint32 PARALELL_SIZE{};
-        ReLU() = default;
+        ReLU(){
+            decodeInfo = DEC_OPR_RELU_INFO;
+            decodeParams = DEC_OPR_RELU_PARAM;
+        }
         
         string info() override {
             return "ReLU          { " + std::to_string(INPUT_SIZE/PARALELL_SIZE) + " }";
@@ -40,8 +49,12 @@ namespace seann {
         void zeroGrads() override{}
         
         uint32 OPERAND_ID() override {
-            return 0x0c01;
+            return OPR_SEBLAS_RELU;
         }
+        
+        uint32 encodeInfo(fstream *fout, uint64 offset) override;
+        
+        uint32 encodeNetParams(fstream *fout, uint64 offset) override;
     };
     
 } // seann

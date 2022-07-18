@@ -4,6 +4,6 @@
 
 #include "OperandBase.cuh"
 
+cudnnHandle_t cudnn;
 namespace seann {
-
 } // seann

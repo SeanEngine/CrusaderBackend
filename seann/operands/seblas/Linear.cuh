@@ -7,7 +7,13 @@
 
 #include "../OperandBase.cuh"
 
+#define OPR_SEBLAS_LINEAR 0x0001
+
 namespace seann {
+    
+    OperandBase* DEC_OPR_LINEAR_INFO(fstream* fin, uint64& offset);
+    void DEC_OPR_LINEAR_PARAM(fstream* fin, uint64& offset, OperandBase* opr, OptimizerInfo* info, shape4 inShape);
+    
     class Linear : public OperandBase {
     public:
         NetParam* weights{};
@@ -17,6 +23,8 @@ namespace seann {
         
         explicit Linear(uint32 OUTPUT_SIZE){
             this->OUTPUT_SIZE = OUTPUT_SIZE;
+            decodeInfo = DEC_OPR_LINEAR_INFO;
+            decodeParams = DEC_OPR_LINEAR_PARAM;
         }
         
         string info() override {
@@ -40,7 +48,7 @@ namespace seann {
         void zeroGrads() override;
         
         uint32 OPERAND_ID() override {
-            return 0x0a01;
+            return OPR_SEBLAS_LINEAR;
         }
         
         float getOptimLR() override;
@@ -55,6 +63,10 @@ namespace seann {
             weights->opt->L2 = val;
             biases->opt->L2 = val;
         }
+        
+        uint32 encodeInfo(fstream *fout, uint64 offset) override;
+        
+        uint32 encodeNetParams(fstream *fout, uint64 offset) override;
     };
     
 } // seann
