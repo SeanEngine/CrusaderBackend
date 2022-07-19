@@ -10,6 +10,7 @@
 #include "DataTransform.cuh"
 #include "Data.cuh"
 
+
 using namespace seblas;
 namespace seio {
     struct Dataset {

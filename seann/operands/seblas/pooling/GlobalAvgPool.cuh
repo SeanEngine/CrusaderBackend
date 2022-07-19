@@ -48,6 +48,14 @@ namespace seann {
         uint32 encodeInfo(fstream *fout, uint64 offset) override;
         
         uint32 encodeNetParams(fstream *fout, uint64 offset) override;
+        
+        uint32 getInfoEncodingSize() override {
+            return 0;
+        }
+        
+        uint32 getNetParamsEncodingSize() override {
+            return 0;
+        }
     };
     
 } // seann

@@ -66,9 +66,6 @@ namespace seann {
         fout->write((char*)&l, sizeof(uint32));
         fout->write((char*)&k, sizeof(uint32));
         runningOffset += sizeof(uint32) * 2;
-        for(uint32 i = 0; i < operandCount; i++) {
-            runningOffset += operands[i]->encodeInfo(fout, runningOffset);
-        }
         return runningOffset - offset;
     }
     

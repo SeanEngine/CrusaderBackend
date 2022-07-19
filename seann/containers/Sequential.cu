@@ -4,6 +4,8 @@
 
 #include "Sequential.cuh"
 #include "../../seblas/assist/Inspections.cuh"
+#include "../../seio/modelcache/codec.cuh"
+#define MODEL_CACHE_PATH "D:\\Projects\\CLionProjects\\Crusader\\ModelSav\\"
 
 namespace seann {
     void Sequential::waive() const {
@@ -101,7 +103,7 @@ namespace seann {
     }
 
 //this train method does not support BN
-    void Sequential::train(Dataset *data, bool WITH_TEST, uint32 TEST_FREQUENCY) const {
+    void Sequential::train(Dataset *data, bool WITH_TEST, uint32 TEST_FREQUENCY) {
         assert(data->BATCH_SIZE > 0 && data->BATCH_SIZE % netX->A->dims.n == 0);
         data->genBatch();
         Tensor* lossBuf = Tensor::create(netY->A->dims);
@@ -132,6 +134,10 @@ namespace seann {
             if (data->epochID != epochID) {
                 for (int i = 0; i < OPERAND_COUNT; i++) {
                     operands[i]->zeroGrads();
+                }
+                if(epochID % 5 == 0){
+                    remove(MODEL_CACHE_PATH "cache.crseq");
+                    saveSequence(MODEL_CACHE_PATH "cache.crseq", this, epochID);
                 }
             }
             

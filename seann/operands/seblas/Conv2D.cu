@@ -78,6 +78,4 @@ namespace seann {
         }
         return runningOffset - offset;
     }
-    
-    
 } // seann

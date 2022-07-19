@@ -37,8 +37,9 @@ namespace seann {
         
         ChannelConcatenater(uint32 paramCount, uint32 outputChannels, const uint32* poses)
         : ChannelConcatenater(paramCount, outputChannels){
-            useLocationGrabber = false;
-            cudaMallocHost(&Xs, sizeof(Parameter*) * (paramCount - 1));
+            useLocationGrabber = true;
+            cudaMallocHost(&locations, sizeof(Parameter*) * (paramCount - 1));
+            assertCuda(__FILE__, __LINE__);
             for (auto i = 0; i < paramCount - 1; i++) {
                 locations[i] = poses[i];
             }
@@ -83,6 +84,14 @@ namespace seann {
         uint32 encodeInfo(fstream *fout, uint64 offset) override;
         
         uint32 encodeNetParams(fstream *fout, uint64 offset) override;
+        
+        uint32 getInfoEncodingSize() override {
+            return sizeof(uint32) * (2 + paramCount - 1);
+        }
+        
+        uint32 getNetParamsEncodingSize() override {
+            return 0;
+        }
     };
 } // seann
 

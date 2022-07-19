@@ -102,6 +102,10 @@ namespace seann {
         virtual uint32 encodeInfo(fstream* fout, uint64 offset) = 0;
         
         virtual uint32 encodeNetParams(fstream* fout, uint64 offset) = 0;
+        
+        virtual uint32 getInfoEncodingSize() = 0;
+        
+        virtual uint32 getNetParamsEncodingSize() = 0;
     };
     
 } // seann

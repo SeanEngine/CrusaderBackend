@@ -33,12 +33,11 @@ namespace seann {
             cudaMallocHost(&operands, sizeof(OperandBase*) * operandCount);
         }
         
-        void initNetParams(OptimizerInfo *info, shape4 inShape) override{
-            X = Parameter::declare(inShape);
+        void initNetFrame(OptimizerInfo *info, shape4 inShape){
             uint32 k0 = inShape.c;
-            uint32 n = inShape.n;
-            Y = Parameter::create(n, k0 + k * l, inShape.h, inShape.w);
-
+            X = Parameter::declare(inShape);
+            Y = Parameter::create(inShape.n, k0 + k * l, inShape.h, inShape.w);
+    
             //initialize block operands
             for(uint32 comp = 0; comp < l; comp++){
                 if(comp==0) {
@@ -52,24 +51,31 @@ namespace seann {
                 operands[comp*7 + 3] = new cuConv2D(
                         shape4(4 * k, k0 + k * comp, 1, 1),
                         1, 1, 0, 0, false
-                        );
+                );
                 operands[comp*7 + 4] = new BatchNorm();
                 operands[comp*7 + 5] = new ReLU();
                 //3x3 convolution
                 operands[comp*7 + 6] = new cuConv2D(
                         shape4(k, 4 * k, 3, 3),
                         1, 1, 1, 1, false
-                        );
+                );
             }
-            
+    
             operands[operandCount-1] = new ChannelConcatenater(2, k0 + k * l, {7});
+        }
+        
+        void initNetParams(OptimizerInfo *info, shape4 inShape) override{
+
+            uint32 k0 = inShape.c;
+            uint32 n = inShape.n;
+    
+            initNetFrame(info, inShape);
             
             //initialize block parameters
             operands[0]->initNetParams(info, shape4(n, k0, inShape.h, inShape.w));
             for(uint32 i = 1; i < operandCount; i++){
                 operands[i]->initNetParams(info, operands[i-1]->Y->A->dims);
             }
-            
         }
         
         void postWaiveInit(OptimizerInfo *inf) override{
@@ -130,6 +136,22 @@ namespace seann {
         uint32 encodeInfo(fstream *fout, uint64 offset) override;
         
         uint32 encodeNetParams(fstream *fout, uint64 offset) override;
+        
+        uint32 getInfoEncodingSize() override{
+            uint32 size = 0;
+            for(uint32 i = 0; i < operandCount; i++){
+                size += operands[i]->getInfoEncodingSize();
+            }
+            return sizeof(uint32) * 2 + size;
+        }
+        
+        uint32 getNetParamsEncodingSize() override{
+            uint32 size = 0;
+            for(uint32 i = 0; i < operandCount; i++){
+                size += operands[i]->getNetParamsEncodingSize();
+            }
+            return size;
+        }
     };
     
 } // seann

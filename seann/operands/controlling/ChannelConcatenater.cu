@@ -24,7 +24,7 @@ namespace seann {
         fout->write((char*)&paramCount, sizeof(uint32));
         fout->write((char*)&outputChannels, sizeof(uint32));
         if (paramCount > 1) {
-            fout->write((char *) &locations, sizeof(uint32) * (paramCount - 1));
+            fout->write((char *) locations, sizeof(uint32) * (paramCount - 1));
             return sizeof(uint32) * (2 + paramCount - 1);
         }
         return sizeof(uint32) * 2;

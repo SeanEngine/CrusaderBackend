@@ -62,6 +62,14 @@ namespace seann {
         uint32 encodeInfo(fstream *fout, uint64 offset) override;
         
         uint32 encodeNetParams(fstream *fout, uint64 offset) override;
+        
+        uint32 getInfoEncodingSize() override{
+            return sizeof(uint32);
+        }
+        
+        uint32 getNetParamsEncodingSize() override{
+            return sizeof(float) * (weights->data()->dims.size + biases->data()->dims.size);
+        }
     };
     
 } // seann

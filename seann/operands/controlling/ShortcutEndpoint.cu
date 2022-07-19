@@ -6,7 +6,6 @@
 
 namespace seann {
     void ShortcutEndpoint::initNetParams(OptimizerInfo *info, shape4 inShape) {
-        
         X = Parameter::declare(inShape);
         Y = Parameter::create(inShape);
     }
