@@ -188,8 +188,6 @@ namespace seio{
             assertCuda(__FILE__, __LINE__);
             
             fin->read((char*)locations, sizeof(uint32) * (paramCount - 1));
-            cout << locations[0] << endl;
-            cout << offset << endl;
             offset += sizeof(uint32) * (paramCount - 1);
             return new ChannelConcatenater(paramCount, outputChannels, locations);
         } else {

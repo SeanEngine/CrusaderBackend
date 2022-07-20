@@ -13,8 +13,9 @@ using namespace seblas;
 using namespace seio;
 using namespace seann;
 
+
 int main(int argc, char** argv) {
-    
+
 //    auto *model = new Sequential(shape4(64, 3, 32, 32), {
 //            new cuConv2D(shape4(24, 3, 3, 3), 1, 1, 1, 1, false),
 //            new BatchNorm(),
@@ -89,6 +90,10 @@ int main(int argc, char** argv) {
         new RandFlipW(dataset->MINI_BATCH_SIZE, dataset->dataShape, dataset->labelShape),
         new RandCorp(dataset->MINI_BATCH_SIZE, dataset->dataShape, dataset->labelShape,4,4)
     });
+    
+    dataset->setProcDispaly(new ProcDisplay("CrossEntropyLoss"));
 
     model->train(dataset, true, 1);
+    
 }
+

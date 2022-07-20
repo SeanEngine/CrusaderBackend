@@ -9,6 +9,7 @@
 #include "DataAugmentor.cuh"
 #include "DataTransform.cuh"
 #include "Data.cuh"
+#include "../watchDog/TrainProcDisplay.cuh"
 
 
 using namespace seblas;
@@ -44,6 +45,8 @@ namespace seio {
         BatchFormer* batchInitializer;
         uint32 augmentationStepCount;
         
+        ProcDisplay* procDisplay;
+        
         static Dataset* construct(uint32 batchSize,uint32 miniBatchSize, uint32 epochSize,
                                   uint32 allDataSize, uint32 maxEpoch, shape4 dataShape, shape4 labelShape);
         
@@ -61,6 +64,10 @@ namespace seio {
             for(uint32 i = 0; i < augmentationStepCount; i++){
                 augmentations[i] = steps.begin()[i];
             }
+        }
+        
+        void setProcDispaly(ProcDisplay* display){
+            procDisplay = display;
         }
         
         void runPreProc();

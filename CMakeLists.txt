@@ -99,7 +99,7 @@ add_executable(Crusader main.cu
         seann/operands/controlling/ChannelConcatenater.cu
         seann/operands/controlling/ChannelConcatenater.cuh
         seann/seann.cuh
-        seann/operands/seblas/pooling/AvgPool2D.cu seann/operands/seblas/pooling/AvgPool2D.cuh seann/operands/seblas/pooling/GlobalAvgPool.cu seann/operands/seblas/pooling/GlobalAvgPool.cuh seann/operands/seblas/activate/LReLU.cu seann/operands/seblas/activate/LReLU.cuh seio/modelcache/codec.cu seio/modelcache/codec.cuh seio/modelcache/OperandCodecs.cu seio/modelcache/OperandCodecs.cuh)
+        seann/operands/seblas/pooling/AvgPool2D.cu seann/operands/seblas/pooling/AvgPool2D.cuh seann/operands/seblas/pooling/GlobalAvgPool.cu seann/operands/seblas/pooling/GlobalAvgPool.cuh seann/operands/seblas/activate/LReLU.cu seann/operands/seblas/activate/LReLU.cuh seio/modelcache/codec.cu seio/modelcache/codec.cuh seio/modelcache/OperandCodecs.cu seio/modelcache/OperandCodecs.cuh seio/watchDog/TrainProcDisplay.cu seio/watchDog/TrainProcDisplay.cuh)
 
 include_directories(${CUDNN_PATH}/include)
 link_directories(${CUDNN_PATH} ${CUDNN_PATH}/bin ${CUDNN_PATH}/lib/x64 ${CUDNN_PATH}/dec/dll_x64)

@@ -84,12 +84,9 @@ namespace seio {
             
             //Run augmentation steps
             Data* src = batchInitializer->form(dataset, index);
-            //inspect(src->X);
             for(uint32 step = 0; step < augmentationStepCount; step++){
                 src = augmentations[step]->apply(src);
             }
-            //inspect(src->X);
-            //exit(0);
             
             cudaMemcpy(dataBatch[batchID%2][i]->X->elements, src->X->elements,
                        sizeof(float) * src->X->dims.size, cudaMemcpyHostToDevice);
