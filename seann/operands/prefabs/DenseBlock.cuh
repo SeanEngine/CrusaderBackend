@@ -50,14 +50,14 @@ namespace seann {
                 //1x1 bottleneck
                 operands[comp*7 + 3] = new cuConv2D(
                         shape4(4 * k, k0 + k * comp, 1, 1),
-                        1, 1, 0, 0, false
+                        1, 1, 0, 0, true
                 );
                 operands[comp*7 + 4] = new BatchNorm();
                 operands[comp*7 + 5] = new ReLU();
                 //3x3 convolution
                 operands[comp*7 + 6] = new cuConv2D(
                         shape4(k, 4 * k, 3, 3),
-                        1, 1, 1, 1, false
+                        1, 1, 1, 1, true
                 );
             }
     

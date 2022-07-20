@@ -27,7 +27,7 @@ namespace seann {
         uint32 dilationH = 1;
         uint32 dilationW = 1;
     
-        bool WITH_BIAS = false;
+        bool WITH_BIAS = true;
     
         cuConv2D(shape4 filterShape, uint32 strideH, uint32 strideW, uint32 padH, uint32 padW, bool WITH_BIAS)
         : filterShape(filterShape), strideH(strideH), strideW(strideW), padH(padH), padW(padW) {

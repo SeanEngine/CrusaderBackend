@@ -38,6 +38,8 @@ namespace seblas {
      * @return
      */
     Tensor* convError(Tensor *A, Tensor *B, Tensor *C, int strideH, int strideW, int padH, int padW);
+    
+    Tensor* convBias(Tensor* Y, Tensor* biases);
 } // seblas
 
 #endif //CRUSADER_CUCONV_CUH

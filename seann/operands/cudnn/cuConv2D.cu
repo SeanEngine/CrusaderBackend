@@ -31,6 +31,9 @@ namespace seann {
                 nullptr, 0,
                 &beta,
                 Y->A->cudnnDesc, Y->A->elements);
+        if (WITH_BIAS) {
+            convBias(Y->A, bias->data());
+        }
     }
     
     void cuConv2D::xGrads() {

@@ -16,57 +16,57 @@ using namespace seann;
 
 int main(int argc, char** argv) {
 
-//    auto *model = new Sequential(shape4(64, 3, 32, 32), {
-//            new cuConv2D(shape4(24, 3, 3, 3), 1, 1, 1, 1, false),
-//            new BatchNorm(),
-//            new ReLU(),
-//
-//            new DenseBlock(12, 16),
-//
-//            new ReLU(),
-//            new BatchNorm(),
-//            new cuConv2D(shape4(108,216,1,1), 1, 1, 0, 0, false),
-//
-//            new ChannelConcatenater(2, 132, {5}),
-//
-//            new ReLU(),
-//            new BatchNorm(),
-//            new cuConv2D(shape4(108,132,1,1), 1, 1, 0, 0, false),
-//
-//            new AvgPool2D(2,2,2,2),
-//
-//            new DenseBlock(12, 16),
-//
-//            new BatchNorm(),
-//            new ReLU(),
-//            new cuConv2D(shape4(150,300,1,1), 1, 1, 0, 0, false),
-//
-//            new ChannelConcatenater(2, 258, {5}),
-//
-//            new BatchNorm(),
-//            new ReLU(),
-//            new cuConv2D( shape4(150,258,1,1), 1, 1, 0, 0, false),
-//
-//            new AvgPool2D(2,2,2,2),
-//
-//            new DenseBlock(12, 16),
-//            new AvgPool2D(2,2,2,2),
-//
-//            new Linear(512),
-//            new BatchNorm(),
-//            new ReLU(),
-//
-//            new Linear(10),
-//            new Softmax()
-//    });
+    auto *model = new Sequential(shape4(64, 3, 32, 32), {
+            new cuConv2D(shape4(24, 3, 3, 3), 1, 1, 1, 1, true),
+            new BatchNorm(),
+            new ReLU(),
+
+            new DenseBlock(12, 16),
+
+            new ReLU(),
+            new BatchNorm(),
+            new cuConv2D(shape4(108,216,1,1), 1, 1, 0, 0, true),
+
+            new ChannelConcatenater(2, 132, {5}),
+
+            new ReLU(),
+            new BatchNorm(),
+            new cuConv2D(shape4(108,132,1,1), 1, 1, 0, 0, true),
+
+            new AvgPool2D(2,2,2,2),
+
+            new DenseBlock(12, 16),
+
+            new BatchNorm(),
+            new ReLU(),
+            new cuConv2D(shape4(150,300,1,1), 1, 1, 0, 0, true),
+
+            new ChannelConcatenater(2, 258, {5}),
+
+            new BatchNorm(),
+            new ReLU(),
+            new cuConv2D( shape4(150,258,1,1), 1, 1, 0, 0, true),
+
+            new AvgPool2D(2,2,2,2),
+
+            new DenseBlock(12, 16),
+            new AvgPool2D(2,2,2,2),
+
+            new Linear(512),
+            new BatchNorm(),
+            new ReLU(),
+
+            new Linear(10),
+            new Softmax()
+    });
 
     OptimizerInfo *info = new OPTIMIZER_MOMENTUM(0.01/64);
-
-    auto* model = loadSequence("D:\\Projects\\CLionProjects\\Crusader\\ModelSav\\cache.crseq",
-                               shape4(64, 3, 32, 32), info);
+//
+//    auto* model = loadSequence("D:\\Projects\\CLionProjects\\Crusader\\ModelSav\\Densenet100.crseq",
+//                               shape4(64, 3, 32, 32), info);
     
-//    model->construct(info);
-//    model->randInit();
+    model->construct(info);
+    model->randInit();
     model->setLoss(crossEntropyLoss, crossEntropyCalc);
 
     auto *dataset = Dataset::construct(6400, 64, 50000, 60000, 150,

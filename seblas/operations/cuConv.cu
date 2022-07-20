@@ -706,6 +706,28 @@ namespace seblas{
         }
     }
     
+    __global__ void convBiasD(Tensor* Y, Tensor* bias){
+        uint32 tid = threadIdx.x + blockIdx.x * blockDim.x;
+        uint32 ndim = blockIdx.y;
+        uint32 globalWarpID = tid / WARP_SIZE;
+        uint32 laneID = threadIdx.x % WARP_SIZE;
+        
+        //each warp will be covering 1 channel from the input tensor
+        uint32 readRange = Y->dims.h * Y->dims.w;
+        uint32 readBeg = laneID * (readRange / WARP_SIZE);
+        uint32 readEnd = laneID == WARP_SIZE - 1 ? readRange : readBeg + readRange / WARP_SIZE;
+        if(globalWarpID >= bias->dims.size) return;
+    
+        float biasVal = bias->elements[globalWarpID];
+        #pragma unroll
+        for(uint32 i = readBeg; i < readEnd; i ++){
+            float val = Y->elements[ndim * (Y->dims.size / Y->dims.n) +
+                                    globalWarpID * readRange + i];
+            val = val + biasVal;
+            Y->elements[ndim * (Y->dims.size / Y->dims.n) + globalWarpID * readRange + i] = val;
+        }
+    }
+    
     void assertConv(Tensor* filters, Tensor* features, Tensor* featureOut, uint32 strideH, uint32 strideW, uint32 padH, uint32 padW){
         if(featureOut->dims.h != (features->dims.h - filters->dims.h + 2 * padH) / strideH + 1){
             logFatal(seio::LOG_SEG_SEBLAS, "Tensor assert failed:");
@@ -781,5 +803,17 @@ namespace seblas{
         cudaDeviceSynchronize();
         assertCuda(__FILE__, __LINE__);
         return A;
+    }
+    
+    Tensor* convBias(Tensor* Y, Tensor* bias){
+        assert(bias->dims.size == Y->dims.c);
+        uint32 warps = (CUDA_BLOCK_SIZE.x * CUDA_BLOCK_SIZE.y) / WARP_SIZE;
+        uint32 block = CUDA_BLOCK_SIZE.x * CUDA_BLOCK_SIZE.y;
+        dim3 grid = dim3((bias->dims.size + warps - 1) / warps,
+                         Y->dims.n);
+        convBiasD<<<grid, block>>>(Y, bias);
+        cudaDeviceSynchronize();
+        assertCuda(__FILE__, __LINE__);
+        return Y;
     }
 }
