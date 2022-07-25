@@ -14,6 +14,10 @@ namespace seblas {
     void crossEntropyLoss(Parameter* Y, Tensor* labels);
     
     float crossEntropyCalc(Parameter* Y, Tensor* labels, Tensor* buf);
+    
+    void Yolo1CompositeLoss(Parameter* Y, Tensor* labels);
+    
+    float Yolo1CompositeCalc(Parameter* Y, Tensor* labels, Tensor* buf);
 } // seblas
 
 #endif //CRUSADER_CULOSS_CUH

@@ -1,16 +1,18 @@
 cmake_minimum_required(VERSION 3.22)
 project(Crusader CUDA CXX)
 
-set(CMAKE_CUDA_STANDARD 14)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CUDA_STANDARD 23)
+set(CMAKE_CXX_STANDARD 23)
 
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -lcudnn -lcublas)
 
 set(CMAKE_CUDA_COMPILER D:/Program\ Files/NVIDIA/CUDA_115_Dev/bin/nvcc.exe)
 set(CUDNN_PATH "D:/Program\ Files/NVIDIA/CUDNN_115")
+set(OpenCV_DIR "D:\\Dependencies\\OpenCV_CUDA\\build")
+include_directories(${OpenCV_DIR}/include)
+find_package(OpenCV REQUIRED core highgui imgproc)
 find_package(CUDA 11.5 REQUIRED)
 
-# find_package(CUDNN REQUIRED)
 add_executable(Crusader main.cu
 
         seblas/assist/CudaAssert.cu
@@ -99,11 +101,26 @@ add_executable(Crusader main.cu
         seann/operands/controlling/ChannelConcatenater.cu
         seann/operands/controlling/ChannelConcatenater.cuh
         seann/seann.cuh
-        seann/operands/seblas/pooling/AvgPool2D.cu seann/operands/seblas/pooling/AvgPool2D.cuh seann/operands/seblas/pooling/GlobalAvgPool.cu seann/operands/seblas/pooling/GlobalAvgPool.cuh seann/operands/seblas/activate/LReLU.cu seann/operands/seblas/activate/LReLU.cuh seio/modelcache/codec.cu seio/modelcache/codec.cuh seio/modelcache/OperandCodecs.cu seio/modelcache/OperandCodecs.cuh seio/watchDog/TrainProcDisplay.cu seio/watchDog/TrainProcDisplay.cuh)
+        seann/operands/seblas/pooling/AvgPool2D.cu
+        seann/operands/seblas/pooling/AvgPool2D.cuh
+        seann/operands/seblas/pooling/GlobalAvgPool.cu
+        seann/operands/seblas/pooling/GlobalAvgPool.cuh
+        seann/operands/seblas/activate/LReLU.cu
+        seann/operands/seblas/activate/LReLU.cuh
 
+        seio/modelcache/codec.cu
+        seio/modelcache/codec.cuh
+        seio/modelcache/OperandCodecs.cu
+        seio/modelcache/OperandCodecs.cuh
+        seio/watchDog/TrainProcDisplay.cu
+        seio/watchDog/TrainProcDisplay.cuh
+        seio/fileParsers/pugiconfig.cuh
+        seio/fileParsers/pugixml.cu
+        seio/fileParsers/pugixml.cuh
+        seio/data/DataFetcher.cu seio/data/DataFetcher.cuh)
 include_directories(${CUDNN_PATH}/include)
 link_directories(${CUDNN_PATH} ${CUDNN_PATH}/bin ${CUDNN_PATH}/lib/x64 ${CUDNN_PATH}/dec/dll_x64)
-target_link_libraries(Crusader ${CUDA_LIBRARIES} cudnn ${CUDNN_PATH}/dec/dll_x64/zlibwapi.lib)
+target_link_libraries(Crusader ${CUDA_LIBRARIES} cudnn ${OpenCV_LIBS})
 
 set_target_properties(Crusader PROPERTIES
         CUDA_SEPARABLE_COMPILATION ON

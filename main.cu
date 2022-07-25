@@ -1,3 +1,4 @@
+
 #include "validation/UnitTestTools.cuh"
 #include "seblas/operations/cuOperations.cuh"
 #include "cudnn.h"
@@ -15,85 +16,126 @@ using namespace seann;
 
 
 int main(int argc, char** argv) {
+    auto* model = new Sequential(shape4(4,3,448,448),{
+        new cuConv2D(shape4(64,3,7,7),2,2,3,3, true),
+        new BatchNorm(),
+        new LReLU(0.1),
+        new MaxPool2D(2,2,2,2),
+        
+        new cuConv2D(shape4(192,64,3,3),1,1,1,1, true),
+        new BatchNorm(),
+        new LReLU(0.1),
+        new MaxPool2D(2,2,2,2),
+        
+        new cuConv2D(shape4(128,192,1,1),1,1,0,0, true),
+        new BatchNorm(),
+        new LReLU(0.1),
 
-    auto *model = new Sequential(shape4(64, 3, 32, 32), {
-            new cuConv2D(shape4(24, 3, 3, 3), 1, 1, 1, 1, true),
-            new BatchNorm(),
-            new ReLU(),
+        new cuConv2D(shape4(256,128,3,3),1,1,1,1, true),
+        new BatchNorm(),
+        new LReLU(0.1),
+        
+        new cuConv2D(shape4(256,256,1,1),1,1,0,0, true),
+        new BatchNorm(),
+        new LReLU(0.1),
+        
+        new cuConv2D(shape4(512,256,3,3),1,1,1,1, true),
+        new BatchNorm(),
+        new LReLU(0.1),
+        
+        new MaxPool2D(2,2,2,2),
 
-            new DenseBlock(12, 16),
+        new cuConv2D(shape4(256,512,1,1),1,1,0,0, true),
+        new BatchNorm(),
+        new LReLU(0.1),
 
-            new ReLU(),
-            new BatchNorm(),
-            new cuConv2D(shape4(108,216,1,1), 1, 1, 0, 0, true),
+        new cuConv2D(shape4(512,256,3,3),1,1,1,1, true),
+        new BatchNorm(),
+        new LReLU(0.1),
 
-            new ChannelConcatenater(2, 132, {5}),
+        new cuConv2D(shape4(256,512,1,1),1,1,0,0, true),
+        new BatchNorm(),
+        new LReLU(0.1),
 
-            new ReLU(),
-            new BatchNorm(),
-            new cuConv2D(shape4(108,132,1,1), 1, 1, 0, 0, true),
+        new cuConv2D(shape4(512,256,3,3),1,1,1,1, true),
+        new BatchNorm(),
+        new LReLU(0.1),
 
-            new AvgPool2D(2,2,2,2),
+        new cuConv2D(shape4(256,512,1,1),1,1,0,0, true),
+        new BatchNorm(),
+        new LReLU(0.1),
 
-            new DenseBlock(12, 16),
+        new cuConv2D(shape4(512,256,3,3),1,1,1,1, true),
+        new BatchNorm(),
+        new LReLU(0.1),
 
-            new BatchNorm(),
-            new ReLU(),
-            new cuConv2D(shape4(150,300,1,1), 1, 1, 0, 0, true),
+        new cuConv2D(shape4(256,512,1,1),1,1,0,0, true),
+        new BatchNorm(),
+        new LReLU(0.1),
 
-            new ChannelConcatenater(2, 258, {5}),
+        new cuConv2D(shape4(512,256,3,3),1,1,1,1, true),
+        new BatchNorm(),
+        new LReLU(0.1),
 
-            new BatchNorm(),
-            new ReLU(),
-            new cuConv2D( shape4(150,258,1,1), 1, 1, 0, 0, true),
+        new cuConv2D(shape4(512,512,1,1),1,1,0,0, true),
+        new BatchNorm(),
+        new LReLU(0.1),
 
-            new AvgPool2D(2,2,2,2),
+        new cuConv2D(shape4(1024,512,3,3),1,1,1,1, true),
+        new BatchNorm(),
+        new LReLU(0.1),
+        
+        new MaxPool2D(2,2,2,2),
 
-            new DenseBlock(12, 16),
-            new AvgPool2D(2,2,2,2),
+        new cuConv2D(shape4(512,1024,1,1),1,1,0,0, true),
+        new BatchNorm(),
+        new LReLU(0.1),
 
-            new Linear(512),
-            new BatchNorm(),
-            new ReLU(),
+        new cuConv2D(shape4(1024,512,3,3),1,1,1,1, true),
+        new BatchNorm(),
+        new LReLU(0.1),
 
-            new Linear(10),
-            new Softmax()
+        new cuConv2D(shape4(512,1024,1,1),1,1,0,0, true),
+        new BatchNorm(),
+        new LReLU(0.1),
+
+        new cuConv2D(shape4(1024,512,3,3),1,1,1,1, true),
+        new BatchNorm(),
+        new LReLU(0.1),
+
+        new cuConv2D(shape4(1024,1024,3,3),1,1,1,1, true),
+        new BatchNorm(),
+        new LReLU(0.1),
+
+        new cuConv2D(shape4(1024,1024,3,3),2,2,1,1, true),
+        new BatchNorm(),
+        new LReLU(0.1),
+
+        new cuConv2D(shape4(1024,1024,3,3),1,1,1,1, true),
+        new BatchNorm(),
+        new LReLU(0.1),
+
+        new cuConv2D(shape4(1024,1024,3,3),1,1,1,1, true),
+        new BatchNorm(),
+        new LReLU(0.1),
+        
+        new Linear(4096),
+        new LReLU(0.1),
+        new Dropout(0.5),
+        
+        new Linear(7*7*30),
     });
-
-    OptimizerInfo *info = new OPTIMIZER_MOMENTUM(0.01/64);
-//
-//    auto* model = loadSequence("D:\\Projects\\CLionProjects\\Crusader\\ModelSav\\Densenet100.crseq",
-//                               shape4(64, 3, 32, 32), info);
+    
+    OptimizerInfo* info = new OPTIMIZER_MOMENTUM(0.001);
     
     model->construct(info);
     model->randInit();
-    model->setLoss(crossEntropyLoss, crossEntropyCalc);
-
-    auto *dataset = Dataset::construct(6400, 64, 50000, 60000, 150,
-                                       shape4(3, 32, 32), shape4(10, 1));
-    const char *BASE_PATH = R"(D:\Resources\Datasets\cifar-10-bin\data_batch_)";
-    for (int i = 0; i < 5; i++) {
-        string binPath = BASE_PATH + to_string(i + 1) + ".bin";
-        fetchCIFAR(dataset, binPath.c_str(), i);
-    }
-    const char* TEST_BASE_PATH = R"(D:\Resources\Datasets\cifar-10-bin\test_batch.bin)";
-    fetchCIFAR(dataset, TEST_BASE_PATH, 5);
-
-    dataset->allocTestSet(3200);
-    dataset->setProcSteps({
-        new UniformNorm()
-    });
-
-    dataset->runPreProc();
-
-    dataset->setAugmentSteps({
-        new RandFlipW(dataset->MINI_BATCH_SIZE, dataset->dataShape, dataset->labelShape),
-        new RandCorp(dataset->MINI_BATCH_SIZE, dataset->dataShape, dataset->labelShape,4,4)
-    });
     
-    dataset->setProcDispaly(new ProcDisplay("CrossEntropyLoss"));
-
-    model->train(dataset, true, 1);
+    Dataset* set = Dataset::construct(640, 8, 16000, 500,
+                                      shape4(3,448,448), shape4(7,7,30));
+    set->setDataFetcher(new DataFetcher(R"(D:\Resources\Datasets\VOCBin)"
+                                         , "Yolo1_VOC_Data", 16000, fetchCrdat));
+    set->allocTestSet(160);
     
 }
 

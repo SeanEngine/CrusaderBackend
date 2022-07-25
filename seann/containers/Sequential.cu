@@ -150,9 +150,9 @@ namespace seann {
                     operands[i]->zeroGrads();
                 }
                 data->procDisplay->reset();
-                if(epochID !=0 && epochID % 5 == 0){
-                    remove(MODEL_CACHE_PATH "Densenet100.crseq");
-                    saveSequence(MODEL_CACHE_PATH "Densenet100.crseq", this, epochID);
+                if(epochID % 5 == 0){
+                    remove(MODEL_CACHE_PATH "cache.crseq");
+                    saveSequence(MODEL_CACHE_PATH "cache.crseq", this, epochID);
                 }
                 data->procDisplay->show(data->epochID);
             }

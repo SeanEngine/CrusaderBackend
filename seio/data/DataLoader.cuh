@@ -5,23 +5,30 @@
 #ifndef CRUSADER_DATALOADER_CUH
 #define CRUSADER_DATALOADER_CUH
 
-#include "Dataset.cuh"
+#include "Data.cuh"
 #include <cstdlib>
 #include <fstream>
+#include <filesystem>
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
+#include "../fileParsers/pugixml.cuh"
 
+#define DTYPE_UCHAR 0x00
+#define DTYPE_FLOAT_32 0x01
+
+using namespace cv;
 namespace seio {
-    typedef unsigned char BYTE;
+    enum BBLabelType{
+        BB_YOLO_1
+    };
     
-    void readBytes(BYTE *buffer, unsigned long size, const char* binPath);
+    void readBytes(unsigned char *buffer, unsigned long size, const char* binPath);
     
     unsigned long getFileSize(const char* binPath);
     
-    Dataset* fetchIDX(Dataset* dataset, const char* binPath, uint32 step, bool isLabel);
-    
-    //<1 x label><3072 x pixel>
-    //...
-    //<1 x label><3072 x pixel>
-    Dataset* fetchCIFAR(Dataset* dataset, const char* binPath, uint32 fileID);
+    void fetchCrdat(Tensor* x, Tensor* label, const char* rootPath, const char* datasetName,
+                    uint32 offset, char* buffer);
     
 } // seann
 

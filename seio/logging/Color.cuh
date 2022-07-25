@@ -5,6 +5,8 @@
 #ifndef CRUSADER_COLOR_CUH
 #define CRUSADER_COLOR_CUH
 
+#define Win32_LEAN_AND_MEAN
+
 #include <algorithm>
 #include <iostream>
 #include <list>

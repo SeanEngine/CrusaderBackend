@@ -15,6 +15,16 @@ namespace seblas {
         }
     }
     
+    //each block will be taking care one of the channel
+    //each thread will be taking care one of the cells
+    template<const uint32 MAX_PARALLEL_CELLS>
+    __global__ void yolo1CompositeLossD(Parameter* Y, Tensor* labels){
+        uint32 bID = blockIdx.x;
+        uint32 tid = threadIdx.x;
+        
+        
+    }
+    
     float crossEntropyCalc(Parameter* Y, Tensor* label, Tensor* buf){
         uint32 block = CUDA_BLOCK_SIZE.y * CUDA_BLOCK_SIZE.x;
         uint32 grid = (buf->dims.size + block - 1) / block;
@@ -29,5 +39,9 @@ namespace seblas {
     void crossEntropyLoss(Parameter* Y, Tensor* labels){
         Y->A->copyToD2D(Y->dA);
         *Y->dA - labels;
+    }
+    
+    void Yolo1CompositeLoss(Parameter* Y, Tensor* labels){
+    
     }
 } // seblas

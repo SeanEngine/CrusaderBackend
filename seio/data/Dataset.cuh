@@ -10,6 +10,7 @@
 #include "DataTransform.cuh"
 #include "Data.cuh"
 #include "../watchDog/TrainProcDisplay.cuh"
+#include "DataFetcher.cuh"
 
 
 using namespace seblas;
@@ -23,6 +24,10 @@ namespace seio {
         Data** dataset;
         Data** testset;
         
+        //dynamic fatching parameters (if enabled)
+        DataFetcher* fetcher;
+        
+        //standard dataset parameters
         uint32 BATCH_SIZE;
         uint32 EPOCH_SIZE;
         uint32 MAX_EPOCH;
@@ -31,7 +36,10 @@ namespace seio {
         
         uint32 batchID = 0;
         uint32 epochID = 0;
-        uint32 remainedData;
+        
+        //this is used when host memory is limited
+        uint32 dynamicLoadSize;
+        bool enableDynamicLoading;
         
         shape4 dataShape;
         shape4 labelShape;
@@ -47,24 +55,15 @@ namespace seio {
         
         ProcDisplay* procDisplay;
         
-        static Dataset* construct(uint32 batchSize,uint32 miniBatchSize, uint32 epochSize,
-                                  uint32 allDataSize, uint32 maxEpoch, shape4 dataShape, shape4 labelShape);
+        //used when you have no idea about the actual size of your dataset
+        static Dataset* construct(uint32 batchSize, uint32 miniBatchSize,uint32 epochSize,
+                                         uint32 maxEpoch, shape4 dataShape, shape4 labelShape);
         
-        void setProcSteps(std::initializer_list<DataTransformer*> steps){
-            preProcStepCount = steps.size();
-            cudaMallocHost(&preProc, preProcStepCount * sizeof(DataTransformer*));
-            for(uint32 i = 0; i < preProcStepCount; i++){
-                preProc[i] = steps.begin()[i];
-            }
-        }
+        void setDataFetcher(DataFetcher* fetcher);
         
-        void setAugmentSteps(std::initializer_list<DataAugmentor*> steps){
-            augmentationStepCount = steps.size();
-            cudaMallocHost(&augmentations, augmentationStepCount * sizeof(DataAugmentor*));
-            for(uint32 i = 0; i < augmentationStepCount; i++){
-                augmentations[i] = steps.begin()[i];
-            }
-        }
+        void setProcSteps(std::initializer_list<DataTransformer*> steps);
+        
+        void setAugmentSteps(std::initializer_list<DataAugmentor*> steps);
         
         void setProcDispaly(ProcDisplay* display){
             procDisplay = display;
