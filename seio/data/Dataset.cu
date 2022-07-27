@@ -8,8 +8,8 @@
 namespace seio {
     
     void transformThread(int tid, int tc, Dataset* set){
-        uint32 beg = tid * (set->EPOCH_SIZE / tc);
-        uint32 end = tid == tc - 1 ? set->EPOCH_SIZE : beg + (set->EPOCH_SIZE / tc);
+        uint32 beg = tid * (set->BATCH_SIZE / tc);
+        uint32 end = tid == tc - 1 ? set->BATCH_SIZE : beg + (set->BATCH_SIZE / tc);
         for(uint32 i = beg; i < end; i++){
             for(uint32 step = 0; step < set->preProcStepCount; step++){
                 set->dataset[i]->X = set->preProc[step]->apply(set->dataset[i]->X);
@@ -48,7 +48,7 @@ namespace seio {
         
         //only one batch of data would be stored in our host memory
         for(uint32 i = 0; i < batchSize; i++) {
-            out->dataset[i] = Data::declare(dataShape, labelShape);
+            out->dataset[i] = Data::declare(dataShape, labelShape)->instantiateHost();
         }
     
         out->dataShape = dataShape;
@@ -61,11 +61,11 @@ namespace seio {
     }
     
     void Dataset::genBatch() {
+        fetcher->fetchTrain(dataset, BATCH_SIZE);
+        runPreProc();
         for(int i = 0; i < BATCH_SIZE / MINI_BATCH_SIZE; i++) {
-            
-            fetcher->fetchTrain(dataset, MINI_BATCH_SIZE);
             //Run augmentation steps
-            Data* src = batchInitializer->form(dataset, i * MINI_BATCH_SIZE);
+            Data* src = batchInitializer->form(dataset, i);
             for(uint32 step = 0; step < augmentationStepCount; step++){
                 src = augmentations[step]->apply(src);
             }
@@ -109,6 +109,9 @@ namespace seio {
         for(uint32 i = 0; i < testSetSize / MINI_BATCH_SIZE; i++){
             for (int proc = 0; proc < MINI_BATCH_SIZE; proc++) {
                 fetcher->fetchTest(dataBuf, labelBuf, i + proc);
+                for(uint32 step = 0; step < preProcStepCount; step++){
+                    dataBuf = preProc[step]->apply(dataBuf);
+                }
                 cudaMemcpy(testset[i]->X->elements + dataShape.size * proc,
                            dataBuf->elements,
                            dataShape.size * sizeof(float),
@@ -144,7 +147,7 @@ namespace seio {
         }
     }
     
-    void Dataset::setDataFetcher(DataFetcher *fetcher) {
-        this->fetcher = fetcher;
+    void Dataset::setDataFetcher(DataFetcher *fetch) {
+        this->fetcher = fetch;
     }
 } // seann

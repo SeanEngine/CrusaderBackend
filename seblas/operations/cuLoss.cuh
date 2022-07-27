@@ -6,6 +6,10 @@
 #define CRUSADER_CULOSS_CUH
 
 #include "../tensor/Parameter.cuh"
+#define YOLO_1_PREDICTORS_NUM 2
+#define YOLO_1_CLASS_NUM 20
+#define YOLO_1_CELL_NUM 7 * 7
+#define YOLO_1_PARALLEL_CELLS 256
 
 namespace seblas {
     typedef void(*LossFunc)(Parameter*, Tensor*);

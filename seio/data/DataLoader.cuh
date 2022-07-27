@@ -28,7 +28,7 @@ namespace seio {
     unsigned long getFileSize(const char* binPath);
     
     void fetchCrdat(Tensor* x, Tensor* label, const char* rootPath, const char* datasetName,
-                    uint32 offset, char* buffer);
+                    uint32 offset, unsigned char** buffer);
     
 } // seann
 

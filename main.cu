@@ -124,18 +124,24 @@ int main(int argc, char** argv) {
         new Dropout(0.5),
         
         new Linear(7*7*30),
+        new ReLU(),
     });
     
-    OptimizerInfo* info = new OPTIMIZER_MOMENTUM(0.001);
+    OptimizerInfo* info = new OPTIMIZER_MOMENTUM(0.01);
     
     model->construct(info);
     model->randInit();
+    model->setLoss(Yolo1CompositeLoss, Yolo1CompositeCalc);
     
-    Dataset* set = Dataset::construct(640, 8, 16000, 500,
+    Dataset* set = Dataset::construct(640, 4, 16000, 500,
                                       shape4(3,448,448), shape4(7,7,30));
     set->setDataFetcher(new DataFetcher(R"(D:\Resources\Datasets\VOCBin)"
                                          , "Yolo1_VOC_Data", 16000, fetchCrdat));
+    set->setProcSteps({new UniformNorm(0,1)});
     set->allocTestSet(160);
+    set->procDisplay = new ProcDisplay("Yolo1Cps");
+    
+    model->train(set, true, 1);
     
 }
 

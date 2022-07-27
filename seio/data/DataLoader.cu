@@ -3,6 +3,7 @@
 //
 
 #include "DataLoader.cuh"
+#include "../../seblas/assist/Inspections.cuh"
 #include <sys/stat.h>
 
 
@@ -43,31 +44,32 @@ namespace seio {
     }
     
     void fetchCrdat(Tensor* x, Tensor* label, const char* rootPath, const char* datasetName,
-                    uint32 offset, char* buffer) {
+                    uint32 offset, unsigned char** buffer) {
         string binPath = string(rootPath) + "\\" + datasetName + ".crdat";
         ifstream binFile(binPath, ios::ate | ios::binary);
         
         uint64 fileSize = binFile.tellg();
-        uint32 operateSize = (x->dims.size + label->dims.size * 4);
+        uint32 operateSize = (x->dims.size + label->dims.size * sizeof(float));
         uint32 maxOffset = fileSize / operateSize;
         assert(offset < maxOffset);
         
         //allocate the buffer if it is not allocated yet
-        if(buffer == nullptr) {
-            cudaMallocHost(&buffer, operateSize);
+        if((*buffer) == nullptr) {
+            cout<<"created fetch buffer"<<endl;
+            cudaMallocHost(buffer, operateSize);
         }
         
-        binFile.seekg(offset * operateSize, ios::beg);
-        binFile.read(buffer, operateSize);
+        //use long long to prevent overflow
+        binFile.seekg((long long) offset * (long long)operateSize, ios::beg);
+        binFile.read((char*)(*buffer), operateSize);
         binFile.close();
-        
-        //fetch the data
-        for (uint32 i = 0; i < x->dims.size; i++) {
-            x->elements[i] = (float) buffer[i];
+    
+        for(uint32 i = 0; i < x->dims.size; i++) {
+            x->elements[i] = (float) (*buffer)[i];
         }
         
         //fetch the labels
-        cudaMemcpy(label->elements, buffer + x->dims.size,
+        cudaMemcpy(label->elements, (*buffer) + x->dims.size,
                    label->dims.size * sizeof(float), cudaMemcpyHostToHost);
     }
 } // seann

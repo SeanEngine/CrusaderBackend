@@ -3,6 +3,7 @@
 //
 
 #include "DataFetcher.cuh"
+#include "../../seblas/assist/Inspections.cuh"
 
 namespace seio {
     
@@ -25,17 +26,18 @@ namespace seio {
             uniform_int_distribution<uint32> distribution(0, remainedData - 1);
             uint32 index = distribution(generator);
             uint32 loadIndex = registry[index].offsetID;
-            fetch(dataset[i]->X, dataset[i]->label, ROOT_PATH.c_str(), DATASET_NAME.c_str(), loadIndex, fetchBuffer);
+            fetch(dataset[i]->X, dataset[i]->label, ROOT_PATH.c_str(), DATASET_NAME.c_str(), loadIndex, &fetchBuffer);
             shift(registry, remainedData, index);
             remainedData--;
             
-            if(remainedData == 0){
+            if(remainedData <= 0){
                 remainedData = EPOCH_SIZE;
             }
         }
     }
     
     void DataFetcher::fetchTest(Tensor * data, Tensor * label, uint32 testID) {
-        fetch(data, label, ROOT_PATH.c_str(), DATASET_NAME.c_str(), EPOCH_SIZE + testID, fetchBuffer);
+        fetch(data, label, ROOT_PATH.c_str(), DATASET_NAME.c_str(), EPOCH_SIZE + testID, &fetchBuffer);
+        assert(fetchBuffer != nullptr);
     }
 } // seio

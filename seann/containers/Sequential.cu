@@ -138,6 +138,7 @@ namespace seann {
                 if(data->batchID % TEST_FREQUENCY == 0){
                     for(int i = 0; i < data->TEST_SIZE/data->MINI_BATCH_SIZE; i++){
                         inferenceForward(data->testset[i]->X);
+                        //inspect(netY->A);
                         lossVal += lossFW(netY, data->testset[i]->label, lossBuf);
                     }
                     lossVal /= (float) data->TEST_SIZE;
@@ -158,20 +159,6 @@ namespace seann {
             }
     
             data->procDisplay->update(batchLoss / (float) data->BATCH_SIZE , lossVal);
-            
-//            if (epochID == 60) {
-//                for (int i = 0; i < OPERAND_COUNT; i++){
-//                    operands[i]->updateOptimLR(operands[i]->getOptimLR() * 0.1f);
-//                    operands[i]->updateL2Const(operands[i]->getL2Const() * 0.1f);
-//                }
-//            }
-//
-//            if (epochID > 60 && epochID % 25 == 0) {
-//                for (int i = 0; i < OPERAND_COUNT; i++) {
-//                    operands[i]->updateOptimLR(operands[i]->getOptimLR() * 0.1f);
-//                    operands[i]->updateL2Const(operands[i]->getL2Const() * 0.1f);
-//                }
-//            }
         }
         trainLog.close();
     }

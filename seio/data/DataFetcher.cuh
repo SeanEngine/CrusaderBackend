@@ -11,7 +11,7 @@
 
 namespace seio {
     //[Data] [Label] [Root Path] [Dataset Name] [load offset]
-    typedef void (*DynamicFetchFunc)(Tensor*, Tensor*, const char*, const char*, uint32, char*);
+    typedef void (*DynamicFetchFunc)(Tensor*, Tensor*, const char*, const char*, uint32, unsigned char**);
     
     struct DataPoint {
         uint32 offsetID;
@@ -26,7 +26,7 @@ namespace seio {
         uint32 remainedData;
         DataPoint* registry{};
         
-        char* fetchBuffer = nullptr;
+        unsigned char* fetchBuffer = nullptr;
         
         DataFetcher(string rootPath, string datasetName, uint32 EPOCH_SIZE, DynamicFetchFunc fetchFunc) {
             ROOT_PATH = std::move(rootPath);
