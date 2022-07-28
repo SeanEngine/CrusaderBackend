@@ -19,16 +19,45 @@
 
 using namespace cv;
 namespace seio {
-    enum BBLabelType{
-        BB_YOLO_1
+    
+    struct Loader{
+        virtual void loadData(Tensor* X, Tensor* label, const char* rootPath, const char* dataName
+            , uint32 offset) = 0;
+    
+        virtual thread preProcess(Tensor *X, Tensor *label) = 0;
+        
+        //called bufore starting preProcess thread
+        virtual void prepareAsync() = 0;
     };
     
-    void readBytes(unsigned char *buffer, unsigned long size, const char* binPath);
+    struct CrdatLoader : public Loader {
+        unsigned char *fetchBuffer = nullptr;
     
-    unsigned long getFileSize(const char* binPath);
+        void loadData(Tensor *X, Tensor *label, const char *rootPath, const char *datasetName,
+                      uint32 offset) override;
+        
+        //since there are no efficiency bottleneck while processing single file
+        //an async pre-process function won't be necessary
+        thread preProcess(Tensor *X, Tensor *label) override{
+            return {};
+        }
+        
+        void prepareAsync() override{}
+    };
     
-    void fetchCrdat(Tensor* x, Tensor* label, const char* rootPath, const char* datasetName,
-                    uint32 offset, unsigned char** buffer);
+    struct ImgLoader : public Loader {
+    public:
+        //buffers
+        cv::Mat inputImg;
+        cv::Mat inputImgCpy;
+    
+        void loadData(Tensor *X, Tensor *label, const char *rootPath, const char *datasetName,
+                      uint32 offset) override;
+        
+        thread preProcess(Tensor *X, Tensor *label) override;
+        
+        void prepareAsync() override;
+    };
     
 } // seann
 

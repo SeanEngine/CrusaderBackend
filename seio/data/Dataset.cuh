@@ -72,7 +72,7 @@ namespace seio {
         void runPreProc();
         
         //The test set will be the last few instances of the input dataset
-        void allocTestSet(uint32 testSetSize);
+        void allocTestSet();
         
         //generate a data batch
         void genBatch();

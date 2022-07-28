@@ -92,7 +92,8 @@ namespace seio {
         return thread(genBatchThread, this);
     }
     
-    void Dataset::allocTestSet(uint32 testSetSize) {
+    void Dataset::allocTestSet() {
+        uint32 testSetSize = fetcher->TEST_SIZE;
         assert(testSetSize % MINI_BATCH_SIZE == 0);
         cudaMallocHost(&testset, testSetSize * sizeof(Data*));
         shape4 procDataShape = {MINI_BATCH_SIZE, dataShape.c, dataShape.h, dataShape.w};
@@ -108,10 +109,14 @@ namespace seio {
         
         for(uint32 i = 0; i < testSetSize / MINI_BATCH_SIZE; i++){
             for (int proc = 0; proc < MINI_BATCH_SIZE; proc++) {
-                fetcher->fetchTest(dataBuf, labelBuf, i + proc);
+                fetcher->fetchTest(dataBuf, labelBuf);
+                
+                //Run load-time steps
                 for(uint32 step = 0; step < preProcStepCount; step++){
                     dataBuf = preProc[step]->apply(dataBuf);
                 }
+                
+                //create mini-batch
                 cudaMemcpy(testset[i]->X->elements + dataShape.size * proc,
                            dataBuf->elements,
                            dataShape.size * sizeof(float),

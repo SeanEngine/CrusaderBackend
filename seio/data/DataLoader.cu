@@ -9,67 +9,68 @@
 
 #define toLittleEndian(i) ((i>>24)&0xFF) | ((i>>8)&0xFF00) | ((i<<8)&0xFF0000) | ((i<<24)&0xFF000000)
 
+using namespace std::chrono;
 namespace seio {
     
-    void readBytes(unsigned char *buffer, unsigned long size, const char *binPath) {
-        FILE *fp = fopen(binPath, "rb");
-        assert(fp != nullptr);
-        fread(buffer, sizeof(unsigned char), size, fp);
-        fclose(fp);
-    }
-    
-    unsigned long getFileSize(const char *binPath) {
-        std::ifstream in(binPath, std::ifstream::ate | std::ifstream::binary);
-        unsigned long size = in.tellg();
-        in.close();
-        return size;
-    }
-    
-    Tensor *fetchOneHotLabel(const unsigned char *buffer, uint32 offset, shape4 dims) {
-        Tensor *label = Tensor::createHost(dims);
-        unsigned char labelVal = buffer[offset];
-        for (uint32 i = 0; i < label->dims.size; i++) {
-            label->elements[i] = (labelVal == i) ? 1.0f : 0.0f;
-        }
-        return label;
-    }
-    
-    //The IDX data must be in NCHW arrangement
-    Tensor *fetchBinImage(const unsigned char *buffer, uint32 offset, shape4 dims) {
-        Tensor *image = Tensor::createHost(dims);
-        for (uint32 i = 0; i < image->dims.size; i++) {
-            image->elements[i] = (float) buffer[offset + i];
-        }
-        return image;
-    }
-    
-    void fetchCrdat(Tensor* x, Tensor* label, const char* rootPath, const char* datasetName,
-                    uint32 offset, unsigned char** buffer) {
-        string binPath = string(rootPath) + "\\" + datasetName + ".crdat";
-        ifstream binFile(binPath, ios::ate | ios::binary);
+    void CrdatLoader::loadData(Tensor *X, Tensor *label, const char *rootPath, const char *datasetName, uint32 offset) {
+            string binPath = string(rootPath) + "\\" + datasetName + ".crdat";
+            ifstream binFile(binPath, ios::ate | ios::binary);
         
-        uint64 fileSize = binFile.tellg();
-        uint32 operateSize = (x->dims.size + label->dims.size * sizeof(float));
-        uint32 maxOffset = fileSize / operateSize;
-        assert(offset < maxOffset);
+            uint64 fileSize = binFile.tellg();
+            uint32 operateSize = (X->dims.size + label->dims.size * sizeof(float));
+            uint32 maxOffset = fileSize / operateSize;
+            assert(offset < maxOffset);
         
-        //allocate the buffer if it is not allocated yet
-        if((*buffer) == nullptr) {
-            cout<<"created fetch buffer"<<endl;
-            cudaMallocHost(buffer, operateSize);
-        }
+            //allocate the buffer if it is not allocated yet
+            if((fetchBuffer) == nullptr) {
+                cout<<"created fetch buffer"<<endl;
+                cudaMallocHost(&fetchBuffer, operateSize);
+            }
         
-        //use long long to prevent overflow
-        binFile.seekg((long long) offset * (long long)operateSize, ios::beg);
-        binFile.read((char*)(*buffer), operateSize);
-        binFile.close();
+            //use long long to prevent overflow
+            binFile.seekg((long long) offset * (long long)operateSize, ios::beg);
+            binFile.read((char*)(fetchBuffer), operateSize);
+            binFile.close();
+        
+            for(uint32 i = 0; i < X->dims.size; i++) {
+                X->elements[i] = (float) (fetchBuffer[i]);
+            }
+        
+            //fetch the labels
+            cudaMemcpy(label->elements, (fetchBuffer) + X->dims.size,
+                       label->dims.size * sizeof(float), cudaMemcpyHostToHost);
+    }
     
-        for(uint32 i = 0; i < x->dims.size; i++) {
-            x->elements[i] = (float) (*buffer)[i];
-        }
+    void ImgLoader::loadData(Tensor *X, Tensor *label, const char *rootPath, const char *datasetName, uint32 offset) {
+        string imgPath = string(rootPath) + "\\" + datasetName;
+        uint32 classID = stoi(string(datasetName).substr(0, string(datasetName).find_first_of('_')));
+    
+        inputImg = cv::imread(imgPath, cv::IMREAD_COLOR);
+        assert(!inputImg.empty());
         
         //fetch the labels
-        cudaMemcpy(label->elements, (*buffer) + x->dims.size,
-                   label->dims.size * sizeof(float), cudaMemcpyHostToHost);
+        assert(classID < label->dims.size);
+        label->elements[classID] = 1.0f;
+    }
+    
+    void imgLoaderPPThread(ImgLoader* ldr, Tensor *X, Tensor *label){
+       //bilinear resize
+       float scaleH = (float)X->dims.h / (float)ldr->inputImg.rows;
+       float scaleW = (float)X->dims.w / (float)ldr->inputImg.cols;
+       float resizeScale = scaleH > scaleW ? scaleH : scaleW;
+       unsigned char* srcDat = ldr->inputImg.data;
+    
+       //a, b, c, d are RGB pixel values
+       //since 4 chars occupy the same memory as an int
+       int a, b, c, d, x, y, index;
+
+    }
+    
+    thread ImgLoader::preProcess(Tensor *X, Tensor *label) {
+       return thread(imgLoaderPPThread, this, X, label);
+    }
+    
+    void ImgLoader::prepareAsync() {
+        inputImgCpy = inputImg.clone();
     }
 } // seann
